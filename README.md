@@ -117,8 +117,8 @@ API multiplataforma). Si aparece escondida, muévela con tu gestor de ventanas
 o activa topmost: true en WindowOptions.
 
 La precisión es f64, lo que permite zooms profundos pero no infinitos. A
-partir de un factor ~10¹³ se empiezan a ver artefactos por la aritmética de
-punto flotante.
+partir de un factor ~10¹³ se empiezan a ver imágenes cada vez más pixeladas 
+por la aritmética de punto flotante.
 
 `minifb` incluye un backend nativo de Wayland que está incompleto: las ventanas
 no se pueden mover, no muestran decoraciones y `set_position` se ignora. Para
