@@ -1,6 +1,11 @@
 # Mandelbrot Explorer (Rust)
 
-![Vista principal](docs/img/preview.png)
+<p align="center">
+  <img src="docs/img/1.png" width="23%">
+  <img src="docs/img/2.png" width="23%">
+  <img src="docs/img/3.png" width="23%">
+  <img src="docs/img/4.png" width="23%">
+</p>
 
 Explorador interactivo del **conjunto de Mandelbrot** escrito en Rust. Renderiza el
 fractal en tiempo real sobre la CPU usando paralelismo con Rayon, permite hacer zoom
