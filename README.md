@@ -46,16 +46,16 @@ capturas en PNG.
 
 bash
 
->git clone <url-del-repo> mandelbrot-rust
->cd mandelbrot-rust
->cargo build --release ## La primera compilación tarda un poco (sobre todo por la dependencia image), pero las siguientes son casi instantáneas.
+ >git clone <url-del-repo> mandelbrot-rust   
+>cd mandelbrot-rust  
+>cargo build --release  ### La primera compilación tarda un poco (sobre todo por la dependencia image), pero las siguientes son casi instantáneas.
 
 ## Uso
 
 bash
 
->cargo run --release   ## Usa siempre --release: en modo debug el render puede ser 20–50 veces más lento.
->cargo run --release -- cX cY Zoom   ## Se indican las coordenadas X e Y en el centro de la imagen y el aumento -zoom- (si no se indica, es 1)
+>cargo run --release  ### Usa siempre --release: en modo debug el render puede ser 20–50 veces más lento.
+>cargo run --release -- cX cY Zoom  ### Se indican las coordenadas X e Y en el centro de la imagen y el aumento -zoom- (si no se indica, es 1)
 
 ## Controles
 
