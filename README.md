@@ -135,14 +135,16 @@ forzado en `Cargo.toml`.
 
 ## Dependencias principales:
 
-Crate	Uso
-minifb	Ventana y framebuffer de píxeles
-num-complex	Aritmética de números complejos
-rayon	Paralelización del bucle de render
-font8x8	Fuente bitmap para dibujar la leyenda
-image	Exportación a PNG
-Licencia
-MIT — haz con el código lo que quieras.
+Crate: Uso
+minifb:	Ventana y framebuffer de píxeles
+num-complex: Aritmética de números complejos
+rayon: Paralelización del bucle de render
+font8x8: Fuente bitmap para dibujar la leyenda
+image: Exportación a PNG
+
+## Licencia:
+
+MIT — haz con el código lo que quieras, pero se agradece que menciones al autor
 
 ## Reconocimientos:
 
