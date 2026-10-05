@@ -23,9 +23,8 @@ permite hacer zoom interactivo, cambiar paletas de color, ajustar el número de 
   del fractal.
 - **8 paletas de color** ciclables, inspiradas en las de Matplotlib:
   `Grayscale`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Hot`, `Flag`, `Twilight`.
-- **Zoom interactivo** por arrastre con el ratón, con rectángulo de selección siempre
-  visible (dibujado por inversión de bits).
-- **Deshacer zoom** con pila de historial.
+- **Zoom interactivo** con un simple toque de ratón.
+- **Deshacer zoom** con historial en buffer.
 - **Ajuste de iteraciones** en pasos de 1000 en tiempo real.
 - **Exportación a PNG** de la vista actual a la carpeta `Capturas/`.
 - **Leyenda en pantalla** con coordenadas del centro, nivel de zoom, iteraciones,
@@ -161,10 +160,19 @@ El uso de Rayon reparte el coste entre todos los núcleos disponibles.
   multiplataforma para esto. Si la ventana aparece mal colocada, muévela
   manualmente con el gestor de ventanas.
 
-## Reconocimientos:
+## Reconocimientos
 
 Las paletas Viridis, Inferno, Plasma y Turbo provienen del proyecto Matplotlib,
 a su vez basadas en trabajo de Nathaniel Smith, Stéfan van der Walt, Bastian
 Bechtold, y otros.
 
 Hot, Flag y Jet son herencia de MATLAB / IDL.
+
+## Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo
+[LICENSE](LICENSE) para el texto completo.
+
+En resumen: puedes usar, copiar, modificar, fusionar, publicar, distribuir,
+sublicenciar y vender copias del software, siempre que preserves el aviso de
+copyright original y no se responsabilice al autor de posibles daños.
