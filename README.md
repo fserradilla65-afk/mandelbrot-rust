@@ -7,10 +7,8 @@
   <img src="docs/img/4.png" width="23%">
 </p>
 
-Explorador interactivo del **conjunto de Mandelbrot** escrito en Rust. Renderiza el
-fractal en tiempo real sobre la CPU usando paralelismo con Rayon, permite hacer zoom
-interactivo, cambiar paletas de color, ajustar el número de iteraciones y guardar
-capturas en PNG.
+Explorador interactivo del **conjunto de Mandelbrot** escrito en Rust. Renderiza el fractal en tiempo real, 
+permite hacer zoom interactivo, cambiar paletas de color, ajustar el número de iteraciones y guardar capturas en PNG.
 
 ![Estado: funcional](https://img.shields.io/badge/estado-funcional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.75%2B-orange)
@@ -33,20 +31,58 @@ capturas en PNG.
 - **Leyenda en pantalla** con coordenadas del centro, nivel de zoom, iteraciones,
   paleta activa, tiempo de render y controles.
 
----
-
 ## Requisitos
 
-- **Rust** 1.75 o superior (instalable vía [rustup](https://rustup.rs/)).
-- En Linux, las dependencias de sistema que requiere `minifb` (habitualmente ya
-  presentes): `libxkbcommon`, `libwayland` o `libX11`.
-- Una GPU con drivers actualizados **no** es necesaria — todo el render es por CPU.
+### Sistema operativo
+
+| SO | Estado | Notas |
+|---|---|---|
+| Linux + X11 | ✅ Soportado | Backend X11 nativo |
+| Linux + Wayland | ✅ Soportado | A través de Xwayland (backend X11) |
+| Windows 10/11 | ✅ Soportado | Backend Win32 (por defecto de `minifb`) |
+| macOS 11+ | ✅ Soportado | Backend Cocoa (por defecto de `minifb`) |
+
+No funciona en Wayland puro sin Xwayland activado.
+
+### Hardware
+
+| Componente | Mínimo | Recomendado |
+|---|---|---|
+| CPU | x86_64 o ARM64, 1 núcleo | 4+ núcleos (Rayon reparte el trabajo) |
+| RAM | 2 GB (1 GB libre durante la compilación) | 4 GB |
+| Disco | 500 MB libres para `target/` | 1 GB |
+| GPU | No necesaria (render 100 % CPU) | — |
+| Pantalla | 1024×768 | 1920×1080 o superior |
+
+Con 1 solo núcleo el programa funciona, pero cada render puede tardar varios
+segundos. A partir de 4 núcleos la interacción es fluida.
+
+### Software
+
+- **Rust** 1.75 o superior, instalable vía [rustup](https://rustup.rs/).
+- **Enlazador del sistema**:
+  - Linux (Debian/Ubuntu): `sudo apt install build-essential`
+  - Linux (Fedora): `sudo dnf groupinstall "Development Tools"`
+  - Linux (Arch): `sudo pacman -S base-devel`
+  - Windows: [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+    con la carga de trabajo "Desarrollo para el escritorio con C++".
+  - macOS: Xcode Command Line Tools (`xcode-select --install`).
+- **Bibliotecas de desarrollo X11** (solo Linux):
+  - Debian/Ubuntu: `sudo apt install libx11-dev libxkbcommon-dev libxcb1-dev`
+  - Fedora: `sudo dnf install libX11-devel libxkbcommon-devel libxcb-devel`
+  - Arch: `sudo pacman -S libx11 libxkbcommon libxcb`
+
+En la mayoría de escritorios Linux estas bibliotecas ya vienen instaladas; solo
+hacen falta explícitamente en instalaciones mínimas o contenedores.
+
+En Windows y macOS no se requiere ninguna dependencia adicional: `minifb` usa
+las APIs del sistema (Win32 y Cocoa respectivamente).
 
 ## Instalación
 
 bash
 
- >git clone <url-del-repo> mandelbrot-rust   
+>git clone https://github.com/fserradilla65-afk/mandelbrot-rust.git   
 >cd mandelbrot-rust  
 >cargo build --release  ### La primera compilación tarda un poco (sobre todo por la dependencia image), pero las siguientes son casi instantáneas.
 
@@ -76,7 +112,7 @@ bash
  Grayscale: escala de grises pura.
 - Capturas: Al pulsar 'S' se guarda la imagen actual (sin leyenda ni barra de paleta) como PNG en: ~Imágenes/Capturas/mandelbrot_<timestamp>.png. El nombre incluye el timestamp en segundos desde epoch, así que las capturas nunca se sobrescriben. Si se pulsa 'Shift+S', guarda la imagen con leyenda y barra de paleta.
 
-## Estructura del proyecto:
+## Estructura del proyecto
 
 mandelbrot-rust/
 ├── Cargo.toml
@@ -109,38 +145,21 @@ Iteraciones	Tiempo por render
 50.000	~3–6 s
 El uso de Rayon reparte el coste entre todos los núcleos disponibles.
 
-## Limitaciones conocidas:
+## Limitaciones conocidas
 
-En `Wayland`, los mensajes de advertencia
-queue 0x... destroyed while proxies still attached al cerrar la ventana son
-inofensivos; provienen de la limpieza de recursos de minifb.
-
-En `Wayland`, algunas teclas con Shift o CapsLock activos pueden no detectarse
-debido a cómo minifb mapea los keysyms. Si ocurre, prueba a soltar los
-modificadores.
-
-La ventana no puede posicionarse programáticamente con minifb (no expone
-API multiplataforma). Si aparece escondida, muévela con tu gestor de ventanas
-o activa topmost: true en WindowOptions.
-
-La precisión es f64, lo que permite zooms profundos pero no infinitos. A
-partir de un factor ~10¹³ se empiezan a ver imágenes cada vez más pixeladas 
-por la aritmética de punto flotante.
-
-`minifb` incluye un backend nativo de Wayland que está incompleto: las ventanas
-no se pueden mover, no muestran decoraciones y `set_position` se ignora. Para
-evitarlo, el proyecto usa solo el backend X11 (que funciona perfectamente bajo
-Xwayland). No requiere ninguna configuración por parte del usuario: está
-forzado en `Cargo.toml`.
-
-## Dependencias principales:
-
-Crate: Uso
-minifb:	Ventana y framebuffer de píxeles
-num-complex: Aritmética de números complejos
-rayon: Paralelización del bucle de render
-font8x8: Fuente bitmap para dibujar la leyenda
-image: Exportación a PNG
+- **Wayland nativo no soportado en Linux.** La app fuerza el backend X11 de
+  `minifb`, que funciona perfectamente a través de Xwayland. Como consecuencia,
+  no arranca en compositores Wayland sin Xwayland activado (poco habitual en
+  escritorios de usuario).
+- **Aviso inofensivo al cerrar (Linux/Wayland).** Al salir pueden aparecer
+  mensajes `queue 0x... destroyed while proxies still attached` en la terminal.
+  Son emitidos por la capa de Wayland/Xwayland al liberar recursos y no indican
+  ningún error real.
+- **Precisión limitada a `f64`.** Permite zooms hasta un factor de ~10¹³–10¹⁵
+  según la zona explorada. Más allá aparecen imagenes cada vez más pixeladas.
+- **Sin posicionamiento programático de la ventana.** `minifb` no expone API
+  multiplataforma para esto. Si la ventana aparece mal colocada, muévela
+  manualmente con el gestor de ventanas.
 
 ## Reconocimientos:
 
