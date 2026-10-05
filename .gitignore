@@ -1,0 +1,13 @@
+# Salida de compilación de Rust
+/target/
+
+# Capturas generadas por el programa
+/Capturas/
+
+# Basura del editor
+*.swp
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
