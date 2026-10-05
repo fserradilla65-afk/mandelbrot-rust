@@ -2,7 +2,6 @@
 
 ![Vista principal](docs/img/preview.png)
 
-Explorador interactivo del **conjunto de Mandelbrot** escrito en Rust...
 Explorador interactivo del **conjunto de Mandelbrot** escrito en Rust. Renderiza el
 fractal en tiempo real sobre la CPU usando paralelismo con Rayon, permite hacer zoom
 interactivo, cambiar paletas de color, ajustar el número de iteraciones y guardar
