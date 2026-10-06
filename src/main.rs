@@ -315,21 +315,34 @@ fn format_time(d: Duration) -> String {
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Guarda el buffer (formato 0x00RRGGBB) como PNG en ~/Imágenes/Capturas/mandelbrot_<ts>.png
+/// Guarda el buffer (formato 0x00RRGGBB) como PNG en la carpeta de imágenes
+/// del usuario, dentro de la subcarpeta "Capturas".
+///
+/// Rutas resultantes (aproximadas según el SO):
+///   - Linux:   ~/Imágenes/Capturas/mandelbrot_<ts>.png  (o ~/Pictures en inglés)
+///   - Windows: C:\Users\<user>\Pictures\Capturas\mandelbrot_<ts>.png
+///   - macOS:   ~/Pictures/Capturas/mandelbrot_<ts>.png
+///
+/// Si `dirs::picture_dir()` no está disponible, cae a `dirs::home_dir()`.
 fn save_png(buffer: &[u32]) -> Result<String, String> {
-    let home = std::env::var("HOME")
-    .map_err(|_| "No se pudo leer la variable de entorno HOME".to_string())?;
-    let dir = format!("{}/Imágenes/Capturas", home);
+    // 1. Localizar la carpeta base de imágenes (o el home como fallback)
+    let base = dirs::picture_dir()
+    .or_else(dirs::home_dir)
+    .ok_or_else(|| "No se pudo determinar la carpeta de imágenes del usuario".to_string())?;
 
-    fs::create_dir_all(&dir).map_err(|e| format!("No se pudo crear '{}': {}", dir, e))?;
+    let dir = base.join("Capturas");
+    fs::create_dir_all(&dir)
+    .map_err(|e| format!("No se pudo crear '{}': {}", dir.display(), e))?;
 
+    // 2. Nombre con timestamp en segundos desde epoch
     let ts = SystemTime::now()
     .duration_since(UNIX_EPOCH)
     .map_err(|e| e.to_string())?
     .as_secs();
 
-    let filename = format!("{}/mandelbrot_{}.png", dir, ts);
+    let filename = dir.join(format!("mandelbrot_{}.png", ts));
 
+    // 3. Convertir 0x00RRGGBB → RGB8 plano
     let mut bytes = Vec::with_capacity(WIDTH * HEIGHT * 3);
     for &p in buffer {
         bytes.push(((p >> 16) & 0xFF) as u8);
@@ -337,6 +350,7 @@ fn save_png(buffer: &[u32]) -> Result<String, String> {
         bytes.push(( p        & 0xFF) as u8);
     }
 
+    // 4. Guardar
     image::save_buffer(
         &filename,
         &bytes,
@@ -344,9 +358,9 @@ fn save_png(buffer: &[u32]) -> Result<String, String> {
         HEIGHT as u32,
         image::ColorType::Rgb8,
     )
-    .map_err(|e| format!("No se pudo guardar '{}': {}", filename, e))?;
+    .map_err(|e| format!("No se pudo guardar '{}': {}", filename.display(), e))?;
 
-    Ok(filename)
+    Ok(filename.to_string_lossy().into_owned())
 }
 /// Parsea argumentos de línea de comandos.
 /// Formatos aceptados:

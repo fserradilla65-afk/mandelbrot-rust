@@ -26,7 +26,7 @@ permite hacer zoom interactivo, cambiar paletas de color, ajustar el número de 
 - **Zoom interactivo** con un simple toque de ratón.
 - **Deshacer zoom** con historial en buffer.
 - **Ajuste de iteraciones** en pasos de 1000 en tiempo real.
-- **Exportación a PNG** de la vista actual a la carpeta `Capturas/`.
+- **Exportación a PNG** de la vista actual.
 - **Leyenda en pantalla** con coordenadas del centro, nivel de zoom, iteraciones,
   paleta activa, tiempo de render y controles.
 
@@ -109,7 +109,7 @@ bash
  Flag: 8 colores puros cíclicos, ideal para ver los bucles de iteración.
  Twilight: paleta cíclica, con extremos claros y centro oscuro.
  Grayscale: escala de grises pura.
-- Capturas: Al pulsar 'S' se guarda la imagen actual (sin leyenda ni barra de paleta) como PNG en: ~Imágenes/Capturas/mandelbrot_<timestamp>.png. El nombre incluye el timestamp en segundos desde epoch, así que las capturas nunca se sobrescriben. Si se pulsa 'Shift+S', guarda la imagen con leyenda y barra de paleta.
+- Capturas: Al pulsar 'S' se guarda la imagen actual (sin leyenda ni barra de paleta) como .PNG en: la carpeta de imágenes del usuario (~/Imágenes/Capturas en Linux, Pictures\Capturas en Windows, ~/Pictures/Capturas en macOS). Si se pulsa 'Shift+S', guarda la imagen con leyenda y barra de paleta.
 
 ## Estructura del proyecto
 
@@ -132,6 +132,19 @@ Zoom — transformación de coordenadas pantalla → plano complejo.
 Selección y leyenda — rectángulo invertido, texto con font8x8, formato de tiempo.
 
 main — bucle de eventos, manejo de ratón y teclado, composición del frame.
+
+## Dependencias
+
+El proyecto usa un conjunto reducido de crates, todos ellos maduros y multiplataforma:
+
+| Crate | Versión | Uso |
+|---|---|---|
+| [`minifb`](https://crates.io/crates/minifb) | 0.28.0 | Ventana y bucle de eventos. En Linux se fuerza el backend X11 (`default-features = false, features = ["x11"]`); en Windows y macOS usa el backend nativo. |
+| [`rayon`](https://crates.io/crates/rayon) | 1.12.0 | Paralelismo de datos en el render (reparte las filas entre todos los núcleos). |
+| [`num-complex`](https://crates.io/crates/num-complex) | 0.4.6 | Tipo `Complex<f64>` para la aritmética del plano complejo. |
+| [`image`](https://crates.io/crates/image) | 0.25.10 | Codificación PNG para las capturas (`default-features = false, features = ["png"]`). |
+| [`font8x8`](https://crates.io/crates/font8x8) | 0.3.1 | Tipografía bitmap 8×8 para la leyenda en pantalla. |
+| [`dirs`](https://crates.io/crates/dirs) | 5.0.1 | Resolución multiplataforma de la carpeta de imágenes del usuario para las capturas. |
 
 ## Rendimiento
 
