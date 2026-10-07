@@ -1,4 +1,4 @@
-use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window, WindowOptions, Scale};
+use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window, WindowOptions};
 use num_complex::Complex;
 use rayon::prelude::*;
 use std::time::{Duration, Instant};
@@ -8,6 +8,7 @@ const HEIGHT: usize = 1000;
 const MAX_ITER_DEFAULT: u32 = 1000;
 const MAX_ITER_STEP: u32 = 1000;
 const MAX_ITER_MIN: u32 = 100;
+const ZOOM_FACTOR: f64 = 2.0;   // cada click reduce a la mitad el ancho visible
 
 // ============================================================
 //  Paletas de color (interpolación lineal sobre anclas)
@@ -170,7 +171,17 @@ impl Viewport {
         3.0 / span
     }
 }
-
+impl Viewport {
+    /// Crea un viewport centrado en (cx, cy) con el zoom indicado (1.0 = vista completa).
+    fn from_center(cx: f64, cy: f64, zoom: f64) -> Self {
+        let half_w = 1.5 / zoom;
+        let half_h = half_w * (HEIGHT as f64 / WIDTH as f64);
+        Viewport {
+            x_min: cx - half_w, x_max: cx + half_w,
+            y_min: cy - half_h, y_max: cy + half_h,
+        }
+    }
+}
 // ============================================================
 //  Render con Rayon + smooth coloring + paleta
 // ============================================================
@@ -221,74 +232,28 @@ fn render_mandelbrot(
     });
 }
 
-// ============================================================
-//  Zoom sobre una selección cuadrada
-// ============================================================
-/// Devuelve `true` si el viewport cambió realmente.
-fn apply_zoom(viewport: &mut Viewport, start: (f64, f64), end: (f64, f64)) -> bool {
-    let width_px  = (end.0 - start.0).abs();
-    let height_px = (end.1 - start.1).abs();
-    let side_px   = width_px.max(height_px);
+/// Hace zoom sobre el punto de pantalla (mx, my) reduciendo el ancho visible
+/// por un factor `factor` (>1). Mantiene el punto bajo el cursor en el centro
+/// de la nueva vista. Devuelve `true` si el viewport cambió.
+fn zoom_at(viewport: &mut Viewport, mx: f64, my: f64, factor: f64) -> bool {
+    if factor <= 1.0 { return false; }
 
-    if side_px < 5.0 { return false; }
-
-    let fx = if end.0 >= start.0 { start.0 + side_px } else { start.0 - side_px };
-    let fy = if end.1 >= start.1 { start.1 + side_px } else { start.1 - side_px };
-
+    // Convertir el píxel del cursor a coordenadas del plano complejo
     let scale_x = (viewport.x_max - viewport.x_min) / (WIDTH  as f64 - 1.0);
     let scale_y = (viewport.y_max - viewport.y_min) / (HEIGHT as f64 - 1.0);
+    let cx = viewport.x_min + mx * scale_x;
+    let cy = viewport.y_min + my * scale_y;
 
-    let new_x1 = viewport.x_min + start.0 * scale_x;
-    let new_y1 = viewport.y_min + start.1 * scale_y;
-    let new_x2 = viewport.x_min + fx      * scale_x;
-    let new_y2 = viewport.y_min + fy      * scale_y;
+    // Nuevo tamaño manteniendo la relación de aspecto
+    let new_half_w = (viewport.x_max - viewport.x_min) * 0.5 / factor;
+    let new_half_h = (viewport.y_max - viewport.y_min) * 0.5 / factor;
 
-    viewport.x_min = new_x1.min(new_x2);
-    viewport.x_max = new_x1.max(new_x2);
-    viewport.y_min = new_y1.min(new_y2);
-    viewport.y_max = new_y1.max(new_y2);
+    viewport.x_min = cx - new_half_w;
+    viewport.x_max = cx + new_half_w;
+    viewport.y_min = cy - new_half_h;
+    viewport.y_max = cy + new_half_h;
 
     true
-}
-// ============================================================
-//  Rectángulo de selección: INVERSIÓN de bits
-//  → siempre visible sobre cualquier color de fondo
-// ============================================================
-
-fn draw_selection_rect(buffer: &mut [u32], start: (f64, f64), end: (f64, f64)) {
-    let width_px  = (end.0 - start.0).abs();
-    let height_px = (end.1 - start.1).abs();
-    let side      = width_px.max(height_px);
-
-    let fx = if end.0 >= start.0 { start.0 + side } else { start.0 - side };
-    let fy = if end.1 >= start.1 { start.1 + side } else { start.1 - side };
-
-    let left   = start.0.min(fx).max(0.0) as usize;
-    let right  = (start.0.max(fx).min((WIDTH  - 1) as f64)) as usize;
-    let top    = start.1.min(fy).max(0.0) as usize;
-    let bottom = (start.1.max(fy).min((HEIGHT - 1) as f64)) as usize;
-
-    let thickness = 2usize;
-
-    let invert = |buf: &mut [u32], x: usize, y: usize| {
-        let i = y * WIDTH + x;
-        buf[i] = !buf[i] & 0x00FF_FFFF;
-    };
-
-    for t in 0..thickness {
-        if top + t < HEIGHT {
-            for x in left..=right { invert(buffer, x, top + t); }
-        }
-        if bottom >= t {
-            for x in left..=right { invert(buffer, x, bottom - t); }
-        }
-        if left + t < WIDTH {
-            for y in top..=bottom { invert(buffer, left + t, y); }
-        }
-        if right >= t {
-            for y in top..=bottom { invert(buffer, right - t, y); }
-        }
-    }
 }
 
 // ============================================================
@@ -350,20 +315,34 @@ fn format_time(d: Duration) -> String {
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Guarda el buffer (formato 0x00RRGGBB) como PNG en ./Capturas/mandelbrot_<ts>.png
-/// Devuelve la ruta del archivo o un mensaje de error.
+/// Guarda el buffer (formato 0x00RRGGBB) como PNG en la carpeta de imágenes
+/// del usuario, dentro de la subcarpeta "Capturas".
+///
+/// Rutas resultantes (aproximadas según el SO):
+///   - Linux:   ~/Imágenes/Capturas/mandelbrot_<ts>.png  (o ~/Pictures en inglés)
+///   - Windows: C:\Users\<user>\Pictures\Capturas\mandelbrot_<ts>.png
+///   - macOS:   ~/Pictures/Capturas/mandelbrot_<ts>.png
+///
+/// Si `dirs::picture_dir()` no está disponible, cae a `dirs::home_dir()`.
 fn save_png(buffer: &[u32]) -> Result<String, String> {
-    let dir = "Capturas";
-    fs::create_dir_all(dir).map_err(|e| format!("No se pudo crear '{}': {}", dir, e))?;
+    // 1. Localizar la carpeta base de imágenes (o el home como fallback)
+    let base = dirs::picture_dir()
+    .or_else(dirs::home_dir)
+    .ok_or_else(|| "No se pudo determinar la carpeta de imágenes del usuario".to_string())?;
 
+    let dir = base.join("Capturas");
+    fs::create_dir_all(&dir)
+    .map_err(|e| format!("No se pudo crear '{}': {}", dir.display(), e))?;
+
+    // 2. Nombre con timestamp en segundos desde epoch
     let ts = SystemTime::now()
     .duration_since(UNIX_EPOCH)
     .map_err(|e| e.to_string())?
     .as_secs();
 
-    let filename = format!("{}/mandelbrot_{}.png", dir, ts);
+    let filename = dir.join(format!("mandelbrot_{}.png", ts));
 
-    // Convertir 0x00RRGGBB → bytes RGB
+    // 3. Convertir 0x00RRGGBB → RGB8 plano
     let mut bytes = Vec::with_capacity(WIDTH * HEIGHT * 3);
     for &p in buffer {
         bytes.push(((p >> 16) & 0xFF) as u8);
@@ -371,6 +350,7 @@ fn save_png(buffer: &[u32]) -> Result<String, String> {
         bytes.push(( p        & 0xFF) as u8);
     }
 
+    // 4. Guardar
     image::save_buffer(
         &filename,
         &bytes,
@@ -378,26 +358,67 @@ fn save_png(buffer: &[u32]) -> Result<String, String> {
         HEIGHT as u32,
         image::ColorType::Rgb8,
     )
-    .map_err(|e| format!("No se pudo guardar '{}': {}", filename, e))?;
+    .map_err(|e| format!("No se pudo guardar '{}': {}", filename.display(), e))?;
 
-    Ok(filename)
+    Ok(filename.to_string_lossy().into_owned())
+}
+/// Parsea argumentos de línea de comandos.
+/// Formatos aceptados:
+///   programa                          → vista por defecto
+///   programa <cx> <cy>                → centra en (cx, cy) con zoom por defecto
+///   programa <cx> <cy> <zoom>         → centra en (cx, cy) con el zoom indicado
+fn parse_args() -> Result<(Option<(f64, f64, f64)>), String> {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+
+    match args.len() {
+        0 => Ok(None),
+        2 | 3 => {
+            let cx: f64 = args[0].parse()
+            .map_err(|_| format!("'{}' no es un número válido para cx", args[0]))?;
+            let cy: f64 = args[1].parse()
+            .map_err(|_| format!("'{}' no es un número válido para cy", args[1]))?;
+            let zoom: f64 = if args.len() == 3 {
+                args[2].parse()
+                .map_err(|_| format!("'{}' no es un número válido para zoom", args[2]))?
+            } else {
+                1.0
+            };
+            if zoom <= 0.0 {
+                return Err("El zoom debe ser mayor que 0".into());
+            }
+            Ok(Some((cx, cy, zoom)))
+        }
+        _ => Err("Uso: mandelbrot-rust [cx cy [zoom]]".into()),
+    }
 }
 // ============================================================
 //  main
 // ============================================================
 fn main() {
-    let mut viewport  = Viewport::initial();
+    let mut viewport = match parse_args() {
+        Ok(Some((cx, cy, zoom))) => Viewport::from_center(cx, cy, zoom),
+        Ok(None) => Viewport::initial(),
+        Err(e) => {
+            eprintln!("Error en los argumentos: {}", e);
+            eprintln!("Uso: mandelbrot-rust [cx cy [zoom]]");
+            std::process::exit(1);
+        }
+    };
+    let initial_viewport = viewport;
     let mut max_iter  = MAX_ITER_DEFAULT;
     let mut palette   = Palette::Viridis;
 
     let mut fractal_buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut display_buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
+    use minifb::{Window, WindowOptions, Scale};
+
     let mut window = Window::new(
         "Mandelbrot Explorer (Rust) — Esc para salir",
                                  WIDTH,
                                  HEIGHT,
                                  WindowOptions {
+                                     scale: Scale::FitScreen,   // ← ajusta al tamaño de pantalla
                                      resize: false,
                                      ..WindowOptions::default()
                                  },
@@ -406,10 +427,9 @@ fn main() {
 
     window.set_target_fps(60);
 
-    let mut is_dragging = false;
-    let mut start_pos   = (0.0f64, 0.0f64);
-    let mut current_pos = (0.0f64, 0.0f64);
     let mut history: Vec<Viewport> = Vec::new();
+    let mut left_was_down  = false;
+    let mut right_was_down = false;
 
     // Render inicial
     let mut last_render_time = {
@@ -421,23 +441,32 @@ fn main() {
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let mut needs_render = false;
 
-        // ---------- Ratón ----------
-        if let Some((x, y)) = window.get_mouse_pos(MouseMode::Clamp) {
-            current_pos = (x as f64, y as f64);
-            if window.get_mouse_down(MouseButton::Left) {
-                if !is_dragging {
-                    is_dragging = true;
-                    start_pos = current_pos;
-                }
-            } else if is_dragging {
-                is_dragging = false;
+        // ---------- Ratón: zoom y deshacer con click ----------
+        let left_down  = window.get_mouse_down(MouseButton::Left);
+        let right_down = window.get_mouse_down(MouseButton::Right);
+
+        // Click izquierdo: zoom centrado en el cursor
+        if left_down && !left_was_down {
+            if let Some((mx, my)) = window.get_mouse_pos(MouseMode::Clamp) {
                 let before = viewport;
-                if apply_zoom(&mut viewport, start_pos, current_pos) {
+                if zoom_at(&mut viewport, mx as f64, my as f64, ZOOM_FACTOR) {
+                    if history.len() >= 500 {
+                        history.remove(0);
+                    }
                     history.push(before);
                     needs_render = true;
                 }
             }
         }
+        // Click derecho: deshacer
+        if right_down && !right_was_down {
+            if let Some(prev) = history.pop() {
+                viewport = prev;
+                needs_render = true;
+            }
+        }
+        left_was_down  = left_down;
+        right_was_down = right_down;
 
         // ---------- Teclado ----------
         if window.is_key_pressed(Key::I, KeyRepeat::No) {
@@ -453,7 +482,7 @@ fn main() {
             needs_render = true;
         }
         if window.is_key_pressed(Key::R, KeyRepeat::No) {
-            viewport = Viewport::initial();
+            viewport = initial_viewport;
             max_iter = MAX_ITER_DEFAULT;
             history.clear();
             needs_render = true;
@@ -464,9 +493,17 @@ fn main() {
                 needs_render = true;
             }
         }
-        if window.is_key_pressed(Key::S, KeyRepeat::No) {
+        // S: captura sin leyenda
+        if window.is_key_pressed(Key::S, KeyRepeat::No) && window.is_key_down(Key::LeftShift) {
+            match save_png(&display_buffer) {
+                Ok(path) => eprintln!("[OK] Captura con leyenda: {}", path),
+                Err(e)   => eprintln!("[ERROR] {}", e),
+            }
+        }
+        // Shift+S: captura con leyenda
+        if window.is_key_pressed(Key::S, KeyRepeat::No) && !window.is_key_down(Key::LeftShift) {
             match save_png(&fractal_buffer) {
-                Ok(path) => eprintln!("[OK] Captura guardada: {}", path),
+                Ok(path) => eprintln!("[OK] Captura limpia: {}", path),
                 Err(e)   => eprintln!("[ERROR] {}", e),
             }
         }
@@ -480,9 +517,6 @@ fn main() {
         // ---------- Composición de la imagen a mostrar ----------
         display_buffer.copy_from_slice(&fractal_buffer);
 
-        if is_dragging {
-            draw_selection_rect(&mut display_buffer, start_pos, current_pos);
-        }
 
         // Barra de la paleta actual
         let bar_x = 10usize;
@@ -501,8 +535,8 @@ fn main() {
         let (cx, cy) = viewport.center();
         let info = format!(
             "Centro: ({:+.8}, {:+.8})   Zoom: {:.3e}   Iter: {}   Paleta: {}   Tiempo: {}\n\
-Arrastra con el boton izquierdo para hacer zoom\n\
-i/o: iter +/-{}   p: paleta   u: undo ({})   r: reset   s: guardar",
+Click izquierdo: zoom (2x)  Click derecho: deshacer zoom\n\
+i/o: iteraciones +/-{}   p: paleta   u: undo ({})   r: reset   s: guardar",
 
 cx, cy,
 viewport.zoom(), max_iter, palette.name(),
@@ -521,9 +555,9 @@ viewport.zoom(), max_iter, palette.name(),
                 if px < WIDTH && py < HEIGHT {
                     let idx = py * WIDTH + px;
                     let bg = display_buffer[idx];
-                    let r = ((bg >> 16) & 0xFF) / 4;
-                    let g = ((bg >>  8) & 0xFF) / 4;
-                    let b = ( bg        & 0xFF) / 4;
+                    let r = 3 * ((bg >> 16) & 0xFF) / 4;
+                    let g = 3 * ((bg >>  8) & 0xFF) / 4;
+                    let b = 3 * ( bg        & 0xFF) / 4;
                     display_buffer[idx] = (r << 16) | (g << 8) | b;
                 }
             }
