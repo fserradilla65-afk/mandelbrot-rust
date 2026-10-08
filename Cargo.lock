@@ -388,7 +388,7 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 
 [[package]]
 name = "mandelbrot-rust"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "font8x8",
@@ -396,6 +396,8 @@ dependencies = [
  "minifb",
  "num-complex",
  "rayon",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -491,6 +493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495"
 dependencies = [
  "num-traits",
+ "serde",
 ]
 
 [[package]]
