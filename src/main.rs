@@ -238,7 +238,7 @@ fn render_fractal(
                     } else {
                         iter as f64
                     };
-                    let t = (smooth * 0.02).rem_euclid(1.0);
+                    let t = (smooth * 0.04).rem_euclid(1.0);
                     palette.color(t)
                 };
             }
