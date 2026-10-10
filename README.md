@@ -7,7 +7,9 @@
   <img src="docs/img/4.png" width="23%">
   <img src="docs/img/5.png" width="23%">
   <img src="docs/img/6.png" width="23%">
-</p>
+  <img src="docs/img/7.png" width="23%">
+  <img src="docs/img/8.png" width="23%">
+  </p>
 
 Explorador interactivo de los conjuntos de **Mandelbrot** y **Julia** escrito en Rust.
 Permite navegar por el plano complejo con zoom continuo y pan, saltar del
