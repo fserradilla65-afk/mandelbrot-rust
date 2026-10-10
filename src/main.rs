@@ -19,7 +19,9 @@ const MAX_ITER_STEP: u32 = 1000;
 const MAX_ITER_MIN: u32 = 100;
 const ZOOM_FACTOR: f64 = 2.0;
 const SCROLL_ZOOM_BASE: f64 = 1.15;
-const DRAG_THRESHOLD_SQ: f64 = 9.0; // 3 px
+const DRAG_THRESHOLD_SQ: f64 = 9.0;
+const HELP_WIDTH: usize = 620;
+const HELP_HEIGHT: usize = 520;
 
 fn main() {
     if let Err(e) = run() {
@@ -29,11 +31,13 @@ fn main() {
 }
 
 fn run() -> Result<(), String> {
+    let mut help_window: Option<Window> = None;
+    let mut help_buffer = vec![0u32; HELP_WIDTH * HELP_HEIGHT];
     let args = cli::parse_args(ASPECT)?;
     let mut st = state::State::new(args);
 
     let mut window = Window::new(
-        "Mandelbrot / Julia Explorer (Rust) — Esc para salir",
+        "Mandelbrot / Julia Explorer (Rust) — F1: Controles — Esc: Salir",
                                  WIDTH,
                                  HEIGHT,
                                  WindowOptions {
@@ -77,7 +81,7 @@ fn run() -> Result<(), String> {
         if let Some((_, dy)) = window.get_scroll_wheel() {
             if dy != 0.0 && mouse_in {
                 st.push_history();
-                let factor = SCROLL_ZOOM_BASE.powf(-dy as f64);
+                let factor = SCROLL_ZOOM_BASE.powf(dy as f64);  // <-- cambio aquí
                 st.viewport.zoom_at(mouse_screen.0, mouse_screen.1, factor, WIDTH, HEIGHT);
                 changed = true;
             }
@@ -198,7 +202,27 @@ fn run() -> Result<(), String> {
                 Err(e) => eprintln!("[ERROR] {}", e),
             }
         }
-
+        if window.is_key_pressed(Key::F1, KeyRepeat::No) {
+            if help_window.is_some() {
+                help_window = None;
+            } else {
+                match Window::new(
+                    "Ayuda — Controles",
+                    HELP_WIDTH,
+                    HELP_HEIGHT,
+                    WindowOptions {
+                        resize: false,
+                        ..WindowOptions::default()
+                    },
+                ) {
+                    Ok(mut w) => {
+                        w.set_target_fps(30);
+                        help_window = Some(w);
+                    }
+                    Err(e) => eprintln!("[ERROR] No se pudo crear ventana de ayuda: {}", e),
+                }
+            }
+        }
         // Grabar secuencia de frames
         if window.is_key_pressed(Key::V, KeyRepeat::No) {
             if recorder.is_some() {
@@ -258,7 +282,17 @@ fn run() -> Result<(), String> {
                 eprintln!("[ERROR] grabando frame: {}", e);
             }
         }
-
+        // Actualizar ventana de ayuda si existe
+        if let Some(ref mut hw) = help_window {
+            if !hw.is_open() {
+                help_window = None;
+            } else {
+                ui::draw_help_window(&mut help_buffer, HELP_WIDTH, HELP_HEIGHT);
+                if hw.update_with_buffer(&help_buffer, HELP_WIDTH, HELP_HEIGHT).is_err() {
+                    help_window = None;
+                }
+            }
+        }
         // ---------- Presentar ----------
         if window
             .update_with_buffer(&display, WIDTH, HEIGHT)

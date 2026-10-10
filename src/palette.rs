@@ -6,7 +6,7 @@ pub const LUT_SIZE: usize = 2048;
 pub enum Palette {
     Viridis,
     Inferno,
-    Magma,
+    Hsv,
     Plasma,
     Turbo,
     Cividis,
@@ -20,14 +20,14 @@ impl Palette {
     /// Orden de ciclado — Grayscale siempre al final.
     pub const CYCLE: [Palette; 10] = [
         Palette::Viridis,
+        Palette::Cividis,
         Palette::Inferno,
-        Palette::Magma,
         Palette::Plasma,
         Palette::Turbo,
-        Palette::Cividis,
+        Palette::Twilight,
+        Palette::Hsv,
         Palette::Hot,
         Palette::Flag,
-        Palette::Twilight,
         Palette::Grayscale,
     ];
 
@@ -40,7 +40,7 @@ impl Palette {
         match self {
             Palette::Viridis => "Viridis",
             Palette::Inferno => "Inferno",
-            Palette::Magma => "Magma",
+            Palette::Hsv => "HSV",
             Palette::Plasma => "Plasma",
             Palette::Turbo => "Turbo",
             Palette::Cividis => "Cividis",
@@ -60,7 +60,7 @@ impl Palette {
             }
             Palette::Viridis => interpolate(&VIRIDIS, t),
             Palette::Inferno => interpolate(&INFERNO, t),
-            Palette::Magma => interpolate(&MAGMA, t),
+            Palette::Hsv => interpolate(&HSV, t),
             Palette::Plasma => interpolate(&PLASMA, t),
             Palette::Turbo => interpolate(&TURBO, t),
             Palette::Cividis => interpolate(&CIVIDIS, t),
@@ -86,12 +86,16 @@ const INFERNO: [(f64, (u8, u8, u8)); 5] = [
     (0.75, (249, 142,   8)),
     (1.00, (252, 255, 164)),
 ];
-const MAGMA: [(f64, (u8, u8, u8)); 5] = [
-    (0.00, (  0,   0,   4)),
-    (0.25, ( 81,  18, 124)),
-    (0.50, (183,  55, 121)),
-    (0.75, (252, 137,  97)),
-    (1.00, (252, 253, 191)),
+// Rueda HSV pura: rojo → amarillo → verde → cian → azul → magenta → rojo.
+// Cíclica: t=0 y t=1 coinciden, ideal para bandas de iteración sin saltos.
+const HSV: [(f64, (u8, u8, u8)); 7] = [
+    (0.000, (255,   0,   0)),  // rojo
+    (0.167, (255, 255,   0)),  // amarillo
+    (0.333, (  0, 255,   0)),  // verde
+    (0.500, (  0, 255, 255)),  // cian
+    (0.667, (  0,   0, 255)),  // azul
+    (0.833, (255,   0, 255)),  // magenta
+    (1.000, (255,   0,   0)),  // rojo (cierre del ciclo)
 ];
 const PLASMA: [(f64, (u8, u8, u8)); 5] = [
     (0.00, ( 13,   8, 135)),
