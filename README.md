@@ -18,7 +18,7 @@ vídeos.
 
 ![Estado: funcional](https://img.shields.io/badge/estado-funcional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)
-![Versión](https://img.shields.io/badge/versi%C3%B3n-0.2.0-blue)
+![Versión](https://img.shields.io/badge/versi%C3%B3n-0.3.0-blue)
 
 ---
 
