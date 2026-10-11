@@ -332,10 +332,12 @@ minifb, que funciona a través de Xwayland. Como consecuencia, no arranca
 en compositores Wayland sin Xwayland activado (poco habitual en escritorios
 de usuario).
 
-Aviso inofensivo al cerrar (Linux/Wayland). Al salir pueden aparecer
-mensajes queue 0x... destroyed while proxies still attached en la terminal.
-Son emitidos por la capa de Wayland/Xwayland al liberar recursos y no indican
-ningún error real.
+En compositores Wayland recientes (se ha observado en Cosmic, y puede
+ocurrir en otros que deleguen el escalado X11 al compositor sin notificar
+al cliente), la ventana puede aparecer con una franja negra a la derecha
+y abajo del fractal. La causa es que el compositor aplica un factor de
+escala (125 %, 150 %…) al área física de la ventana, mientras la app
+sigue renderizando su buffer 1:1.
 
 La ventana de ayuda (F1) no es modal. Es una ventana independiente que
 puede quedar detrás de la principal si haces click en esta última. Para
@@ -347,11 +349,6 @@ según la zona explorada. Más allá aparecen imágenes cada vez más pixeladas.
 Este límite aplica tanto a Mandelbrot como a Julia. No se ha implementado
 perturbation theory ni doble precisión, que serían necesarios para ir más
 lejos.
-
-Sin posicionamiento programático de la ventana. minifb no expone API
-multiplataforma para esto. Si la ventana aparece mal colocada, muévela
-manualmente con el gestor de ventanas. Esto aplica también a la ventana de
-ayuda.
 
 Cambiar de Julia requiere volver a Mandelbrot. La tecla J solo actúa
 en modo Mandelbrot para evitar la ambigüedad de "¿qué c tomo?". Si quieres
@@ -388,7 +385,3 @@ Saupe).
 
 Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo
 LICENSE para el texto completo.
-
-En resumen: puedes usar, copiar, modificar, fusionar, publicar, distribuir,
-sublicenciar y vender copias del software, siempre que preserves el aviso de
-copyright original y no se responsabilice al autor de posibles daños.

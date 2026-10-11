@@ -20,13 +20,15 @@ pub struct Snapshot {
 #[derive(Serialize, Deserialize)]
 pub struct SavedState {
     pub version: u32,
-    pub viewport: Viewport,
+    pub center_x: f64,
+    pub center_y: f64,
+    pub half_width: f64,
+    pub half_height: f64,
     pub kind: FractalKind,
     pub max_iter: u32,
     pub palette: Palette,
     pub antialias: bool,
 }
-
 pub struct State {
     pub viewport: Viewport,
     pub kind: FractalKind,
@@ -124,35 +126,44 @@ impl State {
 
     pub fn save_to_file(&self) -> Result<PathBuf, String> {
         let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
+        let (cx, cy) = self.viewport.center();
         let s = SavedState {
-            version: 1,
-            viewport: self.viewport,
+            version: 2,
+            center_x: cx,
+            center_y: cy,
+            half_width: (self.viewport.x_max - self.viewport.x_min) * 0.5,
+            half_height: (self.viewport.y_max - self.viewport.y_min) * 0.5,
             kind: self.kind,
             max_iter: self.max_iter,
             palette: self.palette,
             antialias: self.antialias,
         };
         let json = serde_json::to_string_pretty(&s)
-            .map_err(|e| format!("no se pudo serializar: {}", e))?;
+        .map_err(|e| format!("no se pudo serializar: {}", e))?;
         std::fs::write(&path, json)
-            .map_err(|e| format!("no se pudo escribir '{}': {}", path.display(), e))?;
+        .map_err(|e| format!("no se pudo escribir '{}': {}", path.display(), e))?;
         Ok(path)
     }
 
     pub fn load_from_file(&mut self) -> Result<(), String> {
         let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
         let data = std::fs::read_to_string(&path)
-            .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
+        .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
         let s: SavedState = serde_json::from_str(&data)
-            .map_err(|e| format!("JSON inválido: {}", e))?;
-        self.viewport = s.viewport;
+        .map_err(|e| format!("JSON inválido: {}", e))?;
+        self.viewport = Viewport {
+            x_min: s.center_x - s.half_width,
+            x_max: s.center_x + s.half_width,
+            y_min: s.center_y - s.half_height,
+            y_max: s.center_y + s.half_height,
+        };
         self.kind = s.kind;
         self.max_iter = s.max_iter.max(MAX_ITER_DEFAULT.min(100));
         self.palette = s.palette;
         self.antialias = s.antialias;
         self.history.clear();
         self.last_mandelbrot = matches!(s.kind, FractalKind::Mandelbrot)
-            .then_some(s.viewport);
+        .then_some(self.viewport);
         Ok(())
     }
 }

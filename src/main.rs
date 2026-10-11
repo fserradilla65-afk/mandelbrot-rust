@@ -7,7 +7,7 @@ mod state;
 mod ui;
 mod viewport;
 
-use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Scale, Window, WindowOptions};
+use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Scale, ScaleMode, Window, WindowOptions};
 use std::time::Instant;
 
 pub const WIDTH: usize = 1000;
@@ -31,17 +31,18 @@ fn main() {
 }
 
 fn run() -> Result<(), String> {
+    let mut help_lang = ui::HelpLang::Es;
     let mut help_window: Option<Window> = None;
     let mut help_buffer = vec![0u32; HELP_WIDTH * HELP_HEIGHT];
     let args = cli::parse_args(ASPECT)?;
     let mut st = state::State::new(args);
-
     let mut window = Window::new(
-        "Mandelbrot / Julia Explorer (Rust) — F1: Controles — Esc: Salir",
+        "Mandelbrot / Julia Explorer (Rust) — F1: Ayuda — Esc: Salir",
                                  WIDTH,
                                  HEIGHT,
                                  WindowOptions {
-                                     scale: Scale::FitScreen,
+                                     scale: Scale::X1,
+                                     scale_mode: ScaleMode::AspectRatioStretch,
                                      resize: false,
                                      ..WindowOptions::default()
                                  },
@@ -49,6 +50,8 @@ fn run() -> Result<(), String> {
     .map_err(|e| format!("no se pudo crear la ventana: {}", e))?;
 
     window.set_target_fps(60);
+    let (ww, wh) = window.get_size();
+    eprintln!("buffer: {}x{}, ventana: {}x{}", WIDTH, HEIGHT, ww, wh);
 
     let mut renderer = render::Renderer::new();
     let mut display = vec![0u32; WIDTH * HEIGHT];
@@ -202,12 +205,11 @@ fn run() -> Result<(), String> {
                 Err(e) => eprintln!("[ERROR] {}", e),
             }
         }
+        // ---------- F1 desde la ventana principal ----------
         if window.is_key_pressed(Key::F1, KeyRepeat::No) {
-            if help_window.is_some() {
-                help_window = None;
-            } else {
+            if help_window.is_none() {
                 match Window::new(
-                    "Ayuda — Controles",
+                    "Ayuda / Help — Controles / Controls",
                     HELP_WIDTH,
                     HELP_HEIGHT,
                     WindowOptions {
@@ -221,6 +223,12 @@ fn run() -> Result<(), String> {
                     }
                     Err(e) => eprintln!("[ERROR] No se pudo crear ventana de ayuda: {}", e),
                 }
+            } else {
+                // La ayuda ya está abierta: alternar idioma
+                help_lang = match help_lang {
+                    ui::HelpLang::Es => ui::HelpLang::En,
+                    ui::HelpLang::En => ui::HelpLang::Es,
+                };
             }
         }
         // Grabar secuencia de frames
@@ -282,16 +290,27 @@ fn run() -> Result<(), String> {
                 eprintln!("[ERROR] grabando frame: {}", e);
             }
         }
-        // Actualizar ventana de ayuda si existe
+        // ---------- Actualizar ventana de ayuda ----------
+        let mut close_help = false;
         if let Some(ref mut hw) = help_window {
-            if !hw.is_open() {
-                help_window = None;
+            if !hw.is_open() || hw.is_key_pressed(Key::Escape, KeyRepeat::No) {
+                close_help = true;
             } else {
-                ui::draw_help_window(&mut help_buffer, HELP_WIDTH, HELP_HEIGHT);
+                // F1 EN LA VENTANA DE AYUDA → alternar idioma
+                if hw.is_key_pressed(Key::F1, KeyRepeat::No) {
+                    help_lang = match help_lang {
+                        ui::HelpLang::Es => ui::HelpLang::En,
+                        ui::HelpLang::En => ui::HelpLang::Es,
+                    };
+                }
+                ui::draw_help_window(&mut help_buffer, HELP_WIDTH, HELP_HEIGHT, help_lang);
                 if hw.update_with_buffer(&help_buffer, HELP_WIDTH, HELP_HEIGHT).is_err() {
-                    help_window = None;
+                    close_help = true;
                 }
             }
+        }
+        if close_help {
+            help_window = None;
         }
         // ---------- Presentar ----------
         if window
@@ -303,6 +322,7 @@ fn run() -> Result<(), String> {
 
             last_mouse = mouse_screen;
         let _ = Instant::now(); // mantiene el import por si quieres medir
+
     }
 
     Ok(())

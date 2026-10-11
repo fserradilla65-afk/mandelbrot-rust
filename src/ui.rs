@@ -156,9 +156,9 @@ pub fn draw_overlay(
 
     let mouse_line = if mouse_in {
         let (mx, my) = st.viewport.pixel_to_complex(mouse_screen.0, mouse_screen.1, WIDTH, HEIGHT);
-        format!("Ratón: ({:+.10}, {:+.10})", mx, my)
+        format!("Raton: ({:+.10}, {:+.10})", mx, my)
     } else {
-        "Ratón: fuera de la ventana".to_string()
+        "Raton: fuera de la ventana".to_string()
     };
 
     let aa_str = if st.antialias { "ON " } else { "OFF" };
@@ -219,26 +219,21 @@ st.kind.name(),
 //  Ventana de ayuda (F1)
 // ============================================================
 
-/// Dibuja el contenido de la ventana de ayuda sobre un buffer de
-/// dimensiones `w × h` (típicamente HELP_WIDTH × HELP_HEIGHT).
-pub fn draw_help_window(buffer: &mut [u32], w: usize, h: usize) {
-    // Fondo oscuro uniforme
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum HelpLang { Es, En }
+
+pub fn draw_help_window(buffer: &mut [u32], w: usize, h: usize, lang: HelpLang) {
     for px in buffer.iter_mut() {
         *px = 0x001A_1A1A;
     }
 
-    // Título
-    draw_text_shadowed_in(
-        buffer,
-        w,
-        h,
-        20,
-        16,
-        "CONTROLES — Mandelbrot / Julia Explorer",
-        0x00FF_FFFF,
-    );
+    let (title, lines): (&str, &[&str]) = match lang {
+        HelpLang::Es => ("CONTROLES — Mandelbrot / Julia Explorer", &HELP_LINES_ES),
+        HelpLang::En => ("CONTROLS — Mandelbrot / Julia Explorer", &HELP_LINES_EN),
+    };
 
-    // Separador horizontal
+    draw_text_shadowed_in(buffer, w, h, 20, 16, title, 0x00FF_FFFF);
+
     let sep_y = 44;
     for x in 20..w.saturating_sub(20) {
         let idx = sep_y * w + x;
@@ -247,30 +242,49 @@ pub fn draw_help_window(buffer: &mut [u32], w: usize, h: usize) {
         }
     }
 
-    // Listado de controles
-    let lineas = [
-        "  Rueda del ratón     Zoom continuo (centrado en cursor)",
-        "  Click izquierdo      Zoom ×2 sobre el punto",
-        "  Arrastrar            Pan (mover la vista)",
-        "  Click derecho / U    Deshacer (undo)",
-        "  J                    Julia desde el punto bajo el cursor",
-        "  M                    Volver a Mandelbrot",
-        "  I / O                Aumentar / reducir iteraciones (±1000)",
-        "  P                    Cambiar paleta de color",
-        "  A                    Antialiasing ON / OFF",
-        "  Z                    Auto-zoom ON / OFF",
-        "  V                    Grabar / detener secuencia de frames",
-        "  S                    Captura PNG (sin leyenda)",
-        "  Shift + S            Captura PNG (con leyenda)",
-        "  F5 / F9              Guardar / cargar estado de la sesión",
-        "  R                    Resetear al estado inicial",
-        "  F1                   Abrir / cerrar esta ventana",
-        "  Esc                  Salir del programa",
-    ];
-
     let mut y = 62;
-    for linea in &lineas {
+    for linea in lines {
         draw_text_shadowed_in(buffer, w, h, 20, y, linea, 0x00DD_DDDD);
         y += 22;
     }
 }
+
+const HELP_LINES_ES: [&str; 17] = [
+    "  Rueda del raton      Zoom continuo (centrado en cursor)",
+    "  Click izquierdo      Zoom ×2 sobre el punto",
+"  Arrastrar            Pan (mover la vista)",
+"  Click derecho / U    Deshacer (undo)",
+"  J                    Julia desde el punto bajo el cursor",
+"  M                    Volver a Mandelbrot",
+"  I / O                Aumentar / reducir iteraciones (±1000)",
+"  P                    Cambiar paleta de color",
+"  A                    Antialiasing ON / OFF",
+"  Z                    Auto-zoom ON / OFF",
+"  V                    Grabar / detener secuencia de frames",
+"  S                    Captura PNG (sin leyenda)",
+"  Shift + S            Captura PNG (con leyenda)",
+"  F5 / F9              Guardar / cargar estado de la sesion",
+"  R                    Resetear al estado inicial",
+"  F1                   Abrir ventana / cambiar idioma (ES/EN)",
+"  Esc                  Salir del programa (o cerrar esta ventana)",
+];
+
+const HELP_LINES_EN: [&str; 17] = [
+    "  Mouse wheel          Continuous zoom (centered on cursor)",
+    "  Left click           Zoom ×2 at point",
+"  Drag                 Pan (move the view)",
+"  Right click / U      Undo",
+"  J                    Julia from point under cursor",
+"  M                    Back to Mandelbrot",
+"  I / O                Increase / decrease iterations (±1000)",
+"  P                    Change color palette",
+"  A                    Antialiasing ON / OFF",
+"  Z                    Auto-zoom ON / OFF",
+"  V                    Record / stop frame sequence",
+"  S                    PNG capture (no legend)",
+"  Shift + S            PNG capture (with legend)",
+"  F5 / F9              Save / load session state",
+"  R                    Reset to initial state",
+"  F1                   Open window / toggle language (ES/EN)",
+"  Esc                  Quit program (or close this window)",
+];
