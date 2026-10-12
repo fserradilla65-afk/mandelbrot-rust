@@ -1,11 +1,4 @@
 # Mandelbrot & Julia Explorer (Rust)
-
-<p align="center">
-  <img src="docs/img/1.png" width="23%">
-  ...
-</p>
-
-> 🌐 **Léelo en otros idiomas:** [English](README.en.md) · **Español**
 ...
 <p align="center">
   <img src="docs/img/1.png" width="23%">
@@ -17,6 +10,8 @@
   <img src="docs/img/7.png" width="23%">
   <img src="docs/img/8.png" width="23%">
   </p>
+
+> 🌐 **Léelo en otros idiomas:** [English](README.en.md) · **Español**
 
 Explorador interactivo de los conjuntos de **Mandelbrot** y **Julia** escrito en Rust.
 Permite navegar por el plano complejo con zoom continuo y pan, saltar del

@@ -2,13 +2,6 @@
 
 <p align="center">
   <img src="docs/img/1.png" width="23%">
-  ...
-</p>
-
-> 🌐 **Read this in other languages:** **English** · [Español](README.md)
-
-<p align="center">
-  <img src="docs/img/1.png" width="23%">
   <img src="docs/img/2.png" width="23%">
   <img src="docs/img/3.png" width="23%">
   <img src="docs/img/4.png" width="23%">
@@ -17,6 +10,8 @@
   <img src="docs/img/7.png" width="23%">
   <img src="docs/img/8.png" width="23%">
 </p>
+
+> 🌐 **Read this in other languages:** **English** · [Español](README.md)
 
 Interactive explorer for the **Mandelbrot** and **Julia** sets written in Rust.
 It lets you navigate the complex plane with continuous zoom and pan, jump from
