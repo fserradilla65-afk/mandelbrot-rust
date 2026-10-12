@@ -2,6 +2,13 @@
 
 <p align="center">
   <img src="docs/img/1.png" width="23%">
+  ...
+</p>
+
+> 🌐 **Léelo en otros idiomas:** [English](README.en.md) · **Español**
+...
+<p align="center">
+  <img src="docs/img/1.png" width="23%">
   <img src="docs/img/2.png" width="23%">
   <img src="docs/img/3.png" width="23%">
   <img src="docs/img/4.png" width="23%">
@@ -21,8 +28,6 @@ vídeos.
 ![Estado: funcional](https://img.shields.io/badge/estado-funcional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)
 ![Versión](https://img.shields.io/badge/versi%C3%B3n-0.3.0-blue)
-
----
 
 ## Características
 
@@ -260,10 +265,9 @@ ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p zoom.mp4
 Combinado con Z (auto-zoom) puedes grabar un zoom continuo sin tocar el
 ratón: pulsa Z para empezar el acercamiento, V para empezar a grabar, deja
 correr, y al terminar pulsa V para parar y Z para desactivar el auto-zoom.
-
 ```
 ## Estructura del proyecto
-
+```
 mandelbrot-rust/
 ├── Cargo.toml
 ├── src/
@@ -278,6 +282,7 @@ mandelbrot-rust/
 │   └── png.rs         # guardado PNG + FrameRecorder
 ├── Capturas/          # Generada al pulsar S o V (no versionada)
 └── README.md
+```
 Cada módulo tiene una responsabilidad clara y se puede probar por separado:
 
 fractal — enum FractalKind { Mandelbrot, Julia { c } } y el iterador
@@ -313,16 +318,17 @@ ventana de ayuda (F1) y llamada a los módulos anteriores.
 
 ## Dependencias
 
-- Crate	Versión	Uso.
-- minifb	0.28.0	Ventana y bucle de eventos. En Linux se fuerza el backend X11 (default-features = false, features = ["x11"]); en Windows y macOS usa el backend nativo.
-- rayon	1.12.0	Paralelismo de datos en el render (reparte las filas entre todos los núcleos).
-- num-complex	0.4.6	Tipo Complex<f64> para representar el parámetro c del Julia y para la aritmética de viewport.
-- image	0.25.10	Codificación PNG para las capturas (default-features = false, features = ["png"]).
-- noto-sans-mono-bitmap	0.3	Tipografía bitmap con antialiasing real (tamaño 16, peso regular) para la leyenda y la ventana de ayuda.
-- dirs	5.0.1	Resolución multiplataforma de la carpeta de imágenes del usuario.
-- serde	1.0	Serialización de Viewport, FractalKind, Palette y SavedState.
-- serde_json	1.0	Formato JSON para guardar y cargar el estado de la sesión.
-``
+|Crate | Versión | Uso
+|---|---|---|
+| minifb	0.28.0	Ventana y bucle de eventos. En Linux se fuerza el backend X11 (default-features = false, features = ["x11"]); en Windows y macOS usa el backend nativo.
+| rayon	1.12.0	Paralelismo de datos en el render (reparte las filas entre todos los núcleos).
+| num-complex	0.4.6	Tipo Complex<f64> para representar el parámetro c del Julia y para la aritmética de viewport.
+| image	0.25.10	Codificación PNG para las capturas (default-features = false, features = ["png"]).
+| noto-sans-mono-bitmap	0.3	Tipografía bitmap con antialiasing real (tamaño 16, peso regular) para la leyenda y la ventana de ayuda.
+| dirs	5.0.1	Resolución multiplataforma de la carpeta de imágenes del usuario.
+| serde	1.0	Serialización de Viewport, FractalKind, Palette y SavedState.
+| serde_json	1.0	Formato JSON para guardar y cargar el estado de la sesión.
+
 ## Limitaciones conocidas
 
 Wayland nativo no soportado en Linux. La app fuerza el backend X11 de
