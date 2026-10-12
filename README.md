@@ -313,16 +313,16 @@ ventana de ayuda (F1) y llamada a los módulos anteriores.
 
 ## Dependencias
 
-|Crate | Versión | Uso
+| Crate | Versión | Uso |
 |---|---|---|
-| minifb	0.28.0	Ventana y bucle de eventos. En Linux se fuerza el backend X11 (default-features = false, features = ["x11"]); en Windows y macOS usa el backend nativo.
-| rayon	1.12.0	Paralelismo de datos en el render (reparte las filas entre todos los núcleos).
-| num-complex	0.4.6	Tipo Complex<f64> para representar el parámetro c del Julia y para la aritmética de viewport.
-| image	0.25.10	Codificación PNG para las capturas (default-features = false, features = ["png"]).
-| noto-sans-mono-bitmap	0.3	Tipografía bitmap con antialiasing real (tamaño 16, peso regular) para la leyenda y la ventana de ayuda.
-| dirs	5.0.1	Resolución multiplataforma de la carpeta de imágenes del usuario.
-| serde	1.0	Serialización de Viewport, FractalKind, Palette y SavedState.
-| serde_json	1.0	Formato JSON para guardar y cargar el estado de la sesión.
+| minifb | 0.28.0 | Ventana y bucle de eventos. En Linux se fuerza el backend X11 (default-features = false, features = ["x11"]); en Windows y macOS usa el backend nativo |
+| rayon |	1.12.0	| Paralelismo de datos en el render (reparte las filas entre todos los núcleos).
+| num-complex	| 0.4.6	| Tipo Complex<f64> para representar el parámetro c del Julia y para la aritmética de viewport |
+| image	 | 0.25.10	| Codificación PNG para las capturas (default-features = false, features = ["png"]) |
+| noto-sans-mono-bitmap	 | 0.3	| Tipografía bitmap con antialiasing real (tamaño 16, peso regular) para la leyenda y la ventana de ayuda |
+| dirs	| 5.0.1	| Resolución multiplataforma de la carpeta de imágenes del usuario |
+| serde	| 1.0	| Serialización de Viewport, FractalKind, Palette y SavedState |
+| serde_json	| 1.0	| Formato JSON para guardar y cargar el estado de la sesión |
 
 ## Limitaciones conocidas
 
