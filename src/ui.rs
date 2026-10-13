@@ -1,3 +1,4 @@
+use crate::fractal::FractalKind;
 use crate::palette::Palette;
 use crate::state::State;
 use crate::{HEIGHT, WIDTH};
@@ -172,23 +173,40 @@ pub fn draw_overlay(
         ""
     };
 
-    let info = format!(
-        "Modo: {}   Centro: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
+    let info = match st.kind {
+        FractalKind::Mandelbrot => format!(
+            "Modo: {}   Centro: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
 Iter: {}   Paleta: {}   AA: {}   Tiempo: {}   Historial: {}{}\n\
 {}{}",
 st.kind.name(),
-                       cx,
-                       cy,
-                       st.viewport.zoom(),
-                       st.max_iter,
-                       st.palette.name(),
-                       aa_str,
-                       format_time(render_time),
-                           st.history.len(),
-                       rec_str,
-                       mouse_line,
-                       preview_str,
-    );
+                                           cx,
+                                           cy,
+                                           st.viewport.zoom(),
+                                           st.max_iter,
+                                           st.palette.name(),
+                                           aa_str,
+                                           format_time(render_time),
+                                               st.history.len(),
+                                           rec_str,
+                                           mouse_line,
+                                           preview_str,
+        ),
+        FractalKind::Julia { .. } => format!(
+            "Modo: {}   Zoom: {:.3e}\n\
+Iter: {}   Paleta: {}   AA: {}   Tiempo: {}   Historial: {}{}\n\
+{}{}",
+st.kind.name(),
+                                             st.viewport.zoom(),
+                                             st.max_iter,
+                                             st.palette.name(),
+                                             aa_str,
+                                             format_time(render_time),
+                                                 st.history.len(),
+                                             rec_str,
+                                             mouse_line,
+                                             preview_str,
+        ),
+    };
 
     // Caja translúcida de fondo
     let lines = info.lines().count();

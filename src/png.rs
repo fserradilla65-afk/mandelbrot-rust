@@ -3,12 +3,9 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 pub fn captures_dir() -> Result<PathBuf, String> {
-    let base = dirs::picture_dir()
-        .or_else(dirs::home_dir)
-        .ok_or_else(|| "no se pudo determinar la carpeta de imágenes".to_string())?;
-    let dir = base.join("Capturas");
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Capturas");
     fs::create_dir_all(&dir)
-        .map_err(|e| format!("no se pudo crear '{}': {}", dir.display(), e))?;
+    .map_err(|e| format!("no se pudo crear '{}': {}", dir.display(), e))?;
     Ok(dir)
 }
 

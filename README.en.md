@@ -131,6 +131,30 @@ cd mandelbrot-rust
 cargo build --release
 ```
 
+## Usage
+
+The program accepts optional command-line arguments to start directly in a
+specific view, without having to navigate to it.
+
+With `cargo run`, the program arguments go **after `--`**:
+
+```bash
+# Mandelbrot with the default framing
+cargo run --release
+
+# Mandelbrot centered on (cx, cy), default zoom (1.0)
+cargo run --release -- <cx> <cy>
+
+# Mandelbrot centered on (cx, cy) with explicit zoom
+cargo run --release -- <cx> <cy> <zoom>
+
+# Julia for parameter c = cr + ci·i, default framing
+cargo run --release -- julia <cr> <ci>
+
+# Julia with explicit zoom
+cargo run --release -- julia <cr> <ci> <zoom>
+```
+
 ## Controls
 
 | Action | Key / mouse |
@@ -218,34 +242,33 @@ but potentially saturated for printing.
 ### Snapshots
 
 Pressing `S` saves the current image (without legend or palette bar) as a
-`.png` in the user's pictures folder:
+`.png` in the project's `Capturas/` folder (the one containing `Cargo.toml`):
 
-- Linux: `~/Pictures/Capturas/` (or `~/Imágenes/Capturas/` in Spanish locales).
-- Windows: `C:\Users\<user>\Pictures\Capturas\`.
-- macOS: `~/Pictures/Capturas/`.
+    mandelbrot-rust/Capturas/mandelbrot_<timestamp>_clean.png
 
 Pressing `Shift+S` saves the image **with** legend and palette bar. The
 filename includes a timestamp in seconds and a tag for the capture type
 (`mandelbrot_<ts>_clean.png` or `mandelbrot_<ts>_legend.png`).
 
+The `Capturas/` folder is created automatically the first time something is
+saved, and is excluded from version control (`.gitignore`).
+
 ### State save and load
 
 `F5` saves the current session state to a JSON file in the same `Capturas/`
 folder:
-Capturas/mandelbrot_state.json
+
+    mandelbrot-rust/Capturas/mandelbrot_state.json
 
 The JSON includes:
 
-- Viewport center (`center_x`, `center_y`) and half-extents (`half_width`,
-  `half_height`).
+- Viewport center in complex coordinates (`center_x`, `center_y`).
+- Zoom (`zoom`), expressed in the same units shown by the viewer.
 - Current mode (Mandelbrot or Julia with its `c` parameter).
 - Maximum number of iterations.
 - Active palette.
 - Antialiasing state.
-
-`F9` restores that state and re-renders the view. Useful to come back to an
-interesting point the next day, or to share a specific framing with someone
-else.
+- `version`: schema number of the format (currently `3`).
 
 ### Video recording
 

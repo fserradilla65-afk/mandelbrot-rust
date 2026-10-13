@@ -11,6 +11,10 @@ use std::path::PathBuf;
 
 pub const HISTORY_MAX: usize = 500;
 
+/// Versión actual del esquema JSON. Cambiar cuando se modifique la
+/// estructura de `SavedState` de forma incompatible.
+pub const STATE_VERSION: u32 = 3;
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Snapshot {
     pub viewport: Viewport,
@@ -22,13 +26,13 @@ pub struct SavedState {
     pub version: u32,
     pub center_x: f64,
     pub center_y: f64,
-    pub half_width: f64,
-    pub half_height: f64,
+    pub zoom: f64,
     pub kind: FractalKind,
     pub max_iter: u32,
     pub palette: Palette,
     pub antialias: bool,
 }
+
 pub struct State {
     pub viewport: Viewport,
     pub kind: FractalKind,
@@ -54,7 +58,7 @@ impl State {
             auto_zoom: false,
             history: VecDeque::new(),
             last_mandelbrot: matches!(args.kind, FractalKind::Mandelbrot)
-                .then_some(args.viewport),
+            .then_some(args.viewport),
             initial_viewport: args.viewport,
             initial_kind: args.kind,
             initial_max_iter: MAX_ITER_DEFAULT,
@@ -88,7 +92,7 @@ impl State {
         self.max_iter = self.initial_max_iter;
         self.history.clear();
         self.last_mandelbrot = matches!(self.initial_kind, FractalKind::Mandelbrot)
-            .then_some(self.initial_viewport);
+        .then_some(self.initial_viewport);
     }
 
     pub fn jump_to_julia(&mut self, mx: f64, my: f64, w: usize, h: usize) -> bool {
@@ -128,11 +132,10 @@ impl State {
         let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
         let (cx, cy) = self.viewport.center();
         let s = SavedState {
-            version: 2,
+            version: STATE_VERSION,
             center_x: cx,
             center_y: cy,
-            half_width: (self.viewport.x_max - self.viewport.x_min) * 0.5,
-            half_height: (self.viewport.y_max - self.viewport.y_min) * 0.5,
+            zoom: self.viewport.zoom(),
             kind: self.kind,
             max_iter: self.max_iter,
             palette: self.palette,
@@ -149,14 +152,49 @@ impl State {
         let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
         let data = std::fs::read_to_string(&path)
         .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
-        let s: SavedState = serde_json::from_str(&data)
+
+        // Parseamos primero como Value para poder leer `version` sin que
+        // un formato antiguo provoque un error críptico de "missing field".
+        let value: serde_json::Value = serde_json::from_str(&data)
         .map_err(|e| format!("JSON inválido: {}", e))?;
-        self.viewport = Viewport {
-            x_min: s.center_x - s.half_width,
-            x_max: s.center_x + s.half_width,
-            y_min: s.center_y - s.half_height,
-            y_max: s.center_y + s.half_height,
+
+        let version = value
+        .get("version")
+        .and_then(|v| v.as_u64())
+        .ok_or_else(|| {
+            "El archivo no contiene el campo 'version'. \
+Probablemente sea de una versión anterior del programa."
+.to_string()
+        })? as u32;
+
+        match version {
+            STATE_VERSION => { /* formato actual, seguimos */ }
+            1 | 2 => {
+                return Err(format!(
+                    "El archivo usa un formato antiguo (v{}). \
+Esta versión del programa espera la v{}. \
+Vuelve a guardarlo con F5.",
+version, STATE_VERSION
+                ));
+            }
+            v => {
+                return Err(format!(
+                    "Versión de estado no soportada: v{}. \
+Esta versión del programa espera la v{}.",
+v, STATE_VERSION
+                ));
+            }
+        }
+
+        let s: SavedState = serde_json::from_value(value)
+        .map_err(|e| format!("JSON inválido para la v{}: {}", STATE_VERSION, e))?;
+
+        let half = match s.kind {
+            FractalKind::Mandelbrot => 1.5 / s.zoom,
+            FractalKind::Julia { .. } => 2.0 / s.zoom,
         };
+
+        self.viewport = Viewport::new_centered(s.center_x, s.center_y, half, ASPECT);
         self.kind = s.kind;
         self.max_iter = s.max_iter.max(MAX_ITER_DEFAULT.min(100));
         self.palette = s.palette;

@@ -128,6 +128,28 @@ git clone https://github.com/fserradilla65-afk/mandelbrot-rust.git
 cd mandelbrot-rust
 cargo build --release
 ```
+## Uso
+
+El programa acepta argumentos opcionales por línea de comandos para arrancar
+directamente en una vista concreta, sin tener que navegar hasta ella.
+
+```bash
+# Mandelbrot con el encuadre por defecto
+cargo run --release
+
+# Mandelbrot centrado en (cx, cy), zoom por defecto (1.0)
+cargo run --release -- <cx> <cy>
+
+# Mandelbrot centrado en (cx, cy) con zoom explícito
+cargo run --release -- <cx> <cy> <zoom>
+
+# Julia para el parámetro c = cr + ci·i, encuadre por defecto
+cargo run --release -- julia <cr> <ci>
+
+# Julia con zoom explícito
+cargo run --release -- julia <cr> <ci> <zoom>
+
+```
 ## Controles
 
 | Acción | Tecla / ratón |
@@ -214,29 +236,33 @@ exploración o vídeos pero potencialmente saturadas para impresión.
 ### Capturas
 
 Al pulsar `S` se guarda la imagen actual (sin leyenda ni barra de paleta) como
-`.png` en la carpeta de imágenes del usuario:
+`.png` en la carpeta `Capturas/` del proyecto (la que contiene el `Cargo.toml`):
 
-- Linux: `~/Imágenes/Capturas/` (o `~/Pictures/Capturas/` en inglés).
-- Windows: `C:\Users\<user>\Pictures\Capturas\`.
-- macOS: `~/Pictures/Capturas/`.
+    mandelbrot-rust/Capturas/mandelbrot_<timestamp>_clean.png
 
 Si se pulsa `Shift+S`, guarda la imagen **con** leyenda y barra de paleta.
 El nombre del archivo incluye un timestamp en segundos y una etiqueta del tipo
 de captura (`mandelbrot_<ts>_clean.png` o `mandelbrot_<ts>_legend.png`).
 
+La carpeta `Capturas/` se crea automáticamente la primera vez que se guarda
+algo, y está excluida del control de versiones (`.gitignore`).
+
 ### Guardado y carga de estado
 
 Con `F5` se guarda el estado actual de la sesión en un JSON dentro de la misma
 carpeta `Capturas/`:
-Capturas/mandelbrot_state.json
+
+    mandelbrot-rust/Capturas/mandelbrot_state.json
 
 El JSON incluye:
 
-- Viewport exacto (esquinas `x_min`, `x_max`, `y_min`, `y_max`).
+- Centro del viewport en coordenadas complejas (`center_x`, `center_y`).
+- Zoom (`zoom`), expresado en las mismas unidades que muestra el visor.
 - Modo actual (Mandelbrot o Julia con su parámetro `c`).
 - Número de iteraciones máximo.
 - Paleta activa.
 - Estado del antialiasing.
+- `version`: número de esquema del formato (actualmente `3`).
 
 Con `F9` se recupera ese estado y se re-renderiza la vista. Es útil para
 volver a un punto interesante al día siguiente, o para compartir un encuadre
