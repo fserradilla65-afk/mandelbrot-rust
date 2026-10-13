@@ -143,7 +143,8 @@ cargo build --release
 | **Back to last Mandelbrot** | `M` (from Julia) |
 | Increase iterations (+1000) | `I` |
 | Decrease iterations (−1000) | `O` |
-| Change palette | `P` |
+| Change palette (rotating) | `P` |
+| Change palette (directly) | `0-9`|
 | Toggle antialiasing | `A` |
 | Auto-zoom on / off | `Z` |
 | Record / stop frame sequence | `V` |

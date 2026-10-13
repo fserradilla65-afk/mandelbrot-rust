@@ -249,15 +249,16 @@ pub fn draw_help_window(buffer: &mut [u32], w: usize, h: usize, lang: HelpLang) 
     }
 }
 
-const HELP_LINES_ES: [&str; 17] = [
-    "  Rueda del raton      Zoom continuo (centrado en cursor)",
-    "  Click izquierdo      Zoom ×2 sobre el punto",
+const HELP_LINES_ES: [&str; 18] = [
+"  Rueda del raton      Zoom continuo (centrado en cursor)",
+"  Click izquierdo      Zoom ×2 sobre el punto",
 "  Arrastrar            Pan (mover la vista)",
 "  Click derecho / U    Deshacer (undo)",
 "  J                    Julia desde el punto bajo el cursor",
 "  M                    Volver a Mandelbrot",
 "  I / O                Aumentar / reducir iteraciones (±1000)",
-"  P                    Cambiar paleta de color",
+"  P                    Cambiar paleta de color (rotando)",
+"  0-9                  Cambiar paleta de color (directa)",
 "  A                    Antialiasing ON / OFF",
 "  Z                    Auto-zoom ON / OFF",
 "  V                    Grabar / detener secuencia de frames",
@@ -269,15 +270,16 @@ const HELP_LINES_ES: [&str; 17] = [
 "  Esc                  Salir del programa (o cerrar esta ventana)",
 ];
 
-const HELP_LINES_EN: [&str; 17] = [
-    "  Mouse wheel          Continuous zoom (centered on cursor)",
-    "  Left click           Zoom ×2 at point",
+const HELP_LINES_EN: [&str; 18] = [
+"  Mouse wheel          Continuous zoom (centered on cursor)",
+"  Left click           Zoom ×2 at point",
 "  Drag                 Pan (move the view)",
 "  Right click / U      Undo",
 "  J                    Julia from point under cursor",
 "  M                    Back to Mandelbrot",
 "  I / O                Increase / decrease iterations (±1000)",
-"  P                    Change color palette",
+"  P                    Change color palette (rotating)",
+"  0-9                  Change color palette (directly)",
 "  A                    Antialiasing ON / OFF",
 "  Z                    Auto-zoom ON / OFF",
 "  V                    Record / stop frame sequence",

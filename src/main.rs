@@ -149,6 +149,22 @@ fn run() -> Result<(), String> {
             st.palette = st.palette.next();
             changed = true;
         }
+        // Selección directa de paleta con teclas 1..9 y 0
+        let digit_keys: [(Key, u8); 10] = [
+            (Key::Key1, 1), (Key::Key2, 2), (Key::Key3, 3), (Key::Key4, 4),
+            (Key::Key5, 5), (Key::Key6, 6), (Key::Key7, 7), (Key::Key8, 8),
+            (Key::Key9, 9), (Key::Key0, 0),
+        ];
+        for (key, d) in digit_keys {
+            if window.is_key_pressed(key, KeyRepeat::No) {
+                if let Some(p) = palette::Palette::from_digit(d) {
+                    if p != st.palette {
+                        st.palette = p;
+                        changed = true;
+                    }
+                }
+            }
+        }
         if window.is_key_pressed(Key::A, KeyRepeat::No) {
             st.antialias = !st.antialias;
             changed = true;

@@ -35,7 +35,16 @@ impl Palette {
         let i = Self::CYCLE.iter().position(|p| *p == self).unwrap_or(0);
         Self::CYCLE[(i + 1) % Self::CYCLE.len()]
     }
-
+    /// Devuelve la paleta asociada a una tecla numérica.
+    /// `1`..`9` → las 9 primeras de CYCLE
+    /// `0`      → la última de CYCLE (Grayscale)
+    pub fn from_digit(d: u8) -> Option<Self> {
+        match d {
+            1..=9 => Some(Self::CYCLE[(d - 1) as usize]),
+            0 => Some(Self::CYCLE[Self::CYCLE.len() - 1]),
+            _ => None,
+        }
+    }
     pub fn name(self) -> &'static str {
         match self {
             Palette::Viridis => "Viridis",
