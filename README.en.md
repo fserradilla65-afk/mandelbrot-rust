@@ -242,23 +242,23 @@ but potentially saturated for printing.
 ### Snapshots
 
 Pressing `S` saves the current image (without legend or palette bar) as a
-`.png` in the project's `Capturas/` folder (the one containing `Cargo.toml`):
+`.png` in the project's `Saves/` folder (the one containing `Cargo.toml`):
 
-    mandelbrot-rust/Capturas/mandelbrot_<timestamp>_clean.png
+    mandelbrot-rust/Saves/mandelbrot_<timestamp>_clean.png
 
 Pressing `Shift+S` saves the image **with** legend and palette bar. The
 filename includes a timestamp in seconds and a tag for the capture type
 (`mandelbrot_<ts>_clean.png` or `mandelbrot_<ts>_legend.png`).
 
-The `Capturas/` folder is created automatically the first time something is
+The `Saves/` folder is created automatically the first time something is
 saved, and is excluded from version control (`.gitignore`).
 
 ### State save and load
 
-`F5` saves the current session state to a JSON file in the same `Capturas/`
+`F5` saves the current session state to a JSON file in the same `Saves/`
 folder:
 
-    mandelbrot-rust/Capturas/mandelbrot_state.json
+    mandelbrot-rust/Saves/mandelbrot_state.json
 
 The JSON includes:
 
@@ -274,8 +274,8 @@ The JSON includes:
 
 Pressing `V` starts recording a PNG frame sequence at 30 fps. Files are saved
 to:
-Capturas/frames_<timestamp>/frame_00000.png
-Capturas/frames_<timestamp>/frame_00001.png
+Saves/frames_<timestamp>/frame_00000.png
+Saves/frames_<timestamp>/frame_00001.png
 ...
 
 Each frame is saved with the same content you see on screen (including the
@@ -307,7 +307,7 @@ mandelbrot-rust/
 │   ├── state.rs       # State, Snapshot, SavedState (save/load)
 │   ├── ui.rs          # antialiased text, palette bar, overlay, help
 │   └── png.rs         # PNG saving + FrameRecorder
-├── Capturas/          # Created when pressing S or V (not versioned)
+├── Saves/          # Created when pressing S or V (not versioned)
 └── README.md
 ```
 

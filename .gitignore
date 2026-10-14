@@ -2,7 +2,7 @@
 /target/
 
 # Capturas generadas por el programa
-/Capturas/
+/Saves/
 
 # Basura del editor
 *.swp

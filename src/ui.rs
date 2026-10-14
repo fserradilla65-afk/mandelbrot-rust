@@ -114,6 +114,22 @@ fn draw_text_shadowed_in(
     draw_text_in(buffer, w, h, x + 1, y + 1, text, 0x0000_0000);
     draw_text_in(buffer, w, h, x, y, text, fg);
 }
+/// Dibuja un texto alineado al borde derecho del buffer, con sombra.
+/// `margin` es el espacio en píxeles hasta el borde.
+pub fn draw_text_right_aligned(
+    buffer: &mut [u32],
+    w: usize,
+    h: usize,
+    x_right_margin: usize,
+    y: usize,
+    text: &str,
+    fg: u32,
+) {
+    let char_w = get_raster_width(FontWeight::Regular, RasterHeight::Size16) as usize;
+    let line_w = text.chars().count() * char_w;
+    let x = w.saturating_sub(line_w + x_right_margin);
+    draw_text_shadowed_in(buffer, w, h, x, y, text, fg);
+}
 
 // ============================================================
 //  Wrappers para la ventana principal (usan WIDTH/HEIGHT globales)
@@ -154,14 +170,6 @@ pub fn draw_overlay(
                     recording_frames: Option<u32>,
 ) {
     let (cx, cy) = st.viewport.center();
-
-    let mouse_line = if mouse_in {
-        let (mx, my) = st.viewport.pixel_to_complex(mouse_screen.0, mouse_screen.1, WIDTH, HEIGHT);
-        format!("Raton: ({:+.10}, {:+.10})", mx, my)
-    } else {
-        "Raton: fuera de la ventana".to_string()
-    };
-
     let aa_str = if st.antialias { "ON " } else { "OFF" };
     let rec_str = match recording_frames {
         Some(n) => format!("   REC: {} frames", n),
@@ -176,8 +184,7 @@ pub fn draw_overlay(
     let info = match st.kind {
         FractalKind::Mandelbrot => format!(
             "Modo: {}   Centro: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
-Iter: {}   Paleta: {}   AA: {}   Tiempo: {}   Historial: {}{}\n\
-{}{}",
+Iter: {}   Paleta: {}   AA: {}   Tiempo: {}{}   Historial: {}{}",
 st.kind.name(),
                                            cx,
                                            cy,
@@ -186,25 +193,22 @@ st.kind.name(),
                                            st.palette.name(),
                                            aa_str,
                                            format_time(render_time),
-                                               st.history.len(),
+                                               preview_str,          // <-- añadido
+                                           st.history.len(),
                                            rec_str,
-                                           mouse_line,
-                                           preview_str,
         ),
         FractalKind::Julia { .. } => format!(
             "Modo: {}   Zoom: {:.3e}\n\
-Iter: {}   Paleta: {}   AA: {}   Tiempo: {}   Historial: {}{}\n\
-{}{}",
+Iter: {}   Paleta: {}   AA: {}   Tiempo: {}{}   Historial: {}{}",
 st.kind.name(),
                                              st.viewport.zoom(),
                                              st.max_iter,
                                              st.palette.name(),
                                              aa_str,
                                              format_time(render_time),
-                                                 st.history.len(),
+                                                 preview_str,          // <-- añadido
+                                             st.history.len(),
                                              rec_str,
-                                             mouse_line,
-                                             preview_str,
         ),
     };
 
@@ -231,6 +235,16 @@ st.kind.name(),
 
     // Texto en gris claro para reducir el "abigarrado"
     draw_text_shadowed(buffer, 10, 10, &info, 0x00E8_E8E8);
+    if mouse_in {
+        let (mx, my) = st.viewport.pixel_to_complex(
+            mouse_screen.0,
+            mouse_screen.1,
+            WIDTH,
+            HEIGHT,
+        );
+        let coords = format!("({:+.10}, {:+.10})", mx, my);
+        draw_text_right_aligned(buffer, WIDTH, HEIGHT, 10, 10, &coords, 0x00E8_E8E8);
+    }
 }
 
 // ============================================================

@@ -2,8 +2,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-pub fn captures_dir() -> Result<PathBuf, String> {
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Capturas");
+pub fn saves_dir() -> Result<PathBuf, String> {
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Saves");
     fs::create_dir_all(&dir)
     .map_err(|e| format!("no se pudo crear '{}': {}", dir.display(), e))?;
     Ok(dir)
@@ -11,13 +11,13 @@ pub fn captures_dir() -> Result<PathBuf, String> {
 
 fn timestamp() -> u64 {
     SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
+    .duration_since(UNIX_EPOCH)
+    .map(|d| d.as_secs())
+    .unwrap_or(0)
 }
 
 pub fn save_png(buffer: &[u32], w: usize, h: usize, tag: &str) -> Result<PathBuf, String> {
-    let dir = captures_dir()?;
+    let dir = saves_dir()?;
     let filename = dir.join(format!("mandelbrot_{}_{}.png", timestamp(), tag));
     write_png(buffer, w, h, &filename)?;
     Ok(filename)
@@ -31,7 +31,7 @@ fn write_png(buffer: &[u32], w: usize, h: usize, path: &Path) -> Result<(), Stri
         bytes.push((p & 0xFF) as u8);
     }
     image::save_buffer(path, &bytes, w as u32, h as u32, image::ColorType::Rgb8)
-        .map_err(|e| format!("no se pudo guardar '{}': {}", path.display(), e))
+    .map_err(|e| format!("no se pudo guardar '{}': {}", path.display(), e))
 }
 
 /// Graba una secuencia de PNG numerados (útil para componer vídeo con ffmpeg).
@@ -45,14 +45,14 @@ pub struct FrameRecorder {
 impl FrameRecorder {
     pub fn new(fps: u32) -> Result<Self, String> {
         let fps = fps.max(1);
-        let dir = captures_dir()?.join(format!("frames_{}", timestamp()));
+        let dir = saves_dir()?.join(format!("frames_{}", timestamp()));
         fs::create_dir_all(&dir)
-            .map_err(|e| format!("no se pudo crear '{}': {}", dir.display(), e))?;
+        .map_err(|e| format!("no se pudo crear '{}': {}", dir.display(), e))?;
         Ok(Self {
             dir,
             counter: 0,
             last_save: Instant::now() - Duration::from_secs(1),
-            interval: Duration::from_millis(1000 / fps as u64),
+           interval: Duration::from_millis(1000 / fps as u64),
         })
     }
 

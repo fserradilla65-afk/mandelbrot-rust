@@ -127,9 +127,8 @@ impl State {
             preview,
         }
     }
-
     pub fn save_to_file(&self) -> Result<PathBuf, String> {
-        let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
+        let path = crate::png::saves_dir()?.join("mandelbrot_state.json");
         let (cx, cy) = self.viewport.center();
         let s = SavedState {
             version: STATE_VERSION,
@@ -147,9 +146,8 @@ impl State {
         .map_err(|e| format!("no se pudo escribir '{}': {}", path.display(), e))?;
         Ok(path)
     }
-
     pub fn load_from_file(&mut self) -> Result<(), String> {
-        let path = crate::png::captures_dir()?.join("mandelbrot_state.json");
+        let path = crate::png::saves_dir()?.join("mandelbrot_state.json");
         let data = std::fs::read_to_string(&path)
         .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
 
