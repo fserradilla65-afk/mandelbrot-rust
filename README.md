@@ -1,5 +1,5 @@
 # Mandelbrot & Julia Explorer (Rust)
-...
+
 <p align="center">
   <img src="docs/img/1.png" width="23%">
   <img src="docs/img/2.png" width="23%">
@@ -9,405 +9,426 @@
   <img src="docs/img/6.png" width="23%">
   <img src="docs/img/7.png" width="23%">
   <img src="docs/img/8.png" width="23%">
-  </p>
+</p>
 
-> 🌐 **Léelo en otros idiomas:** [English](README.en.md) · **Español**
+> 🌐 **Read this in other languages:** **English** · [Español](README.es.md)
 
-Explorador interactivo de los conjuntos de **Mandelbrot** y **Julia** escrito en Rust.
-Permite navegar por el plano complejo con zoom continuo y pan, saltar del
-Mandelbrot al Julia asociado a cualquier punto, cambiar paletas de color, ajustar
-el número de iteraciones, activar antialiasing, guardar capturas en PNG, salvar
-y recuperar el estado de la sesión y grabar secuencias de frames para componer
-vídeos.
+Interactive explorer for the **Mandelbrot** and **Julia** sets written in Rust.
+It lets you navigate the complex plane with continuous zoom and pan, jump from
+Mandelbrot to the Julia set associated with any point, switch color palettes,
+adjust the number of iterations, enable antialiasing, save PNG snapshots, save
+and reload the session state, and record frame sequences for video composition.
 
-![Estado: funcional](https://img.shields.io/badge/estado-funcional-brightgreen)
+![Status: functional](https://img.shields.io/badge/status-functional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)
-![Versión](https://img.shields.io/badge/versi%C3%B3n-0.3.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 
-## Características
+---
 
-- **Render paralelo** con [Rayon](https://crates.io/crates/rayon): reparte las
-  filas de la imagen entre todos los núcleos de la CPU automáticamente.
-- **Render asíncrono en hilo aparte**: el cálculo del fractal vive en su propio
-  hilo, así la ventana sigue respondiendo a teclado y ratón aunque un frame
-  tarde en completarse. Los renders obsoletos se descartan en cuanto llega uno
-  más nuevo.
-- **Dos fractales con el mismo motor**: Mandelbrot (plano de parámetros `c`) y
-  Julia (plano dinámico `z` para un `c` fijo). La iteración `z ← z² + c` es
-  idéntica; solo cambia qué variable recorre el plano.
-- **Salto interactivo Mandelbrot → Julia** con la tecla `J`: el punto bajo el
-  cursor (o el centro si el ratón está fuera de la ventana) pasa a ser el
-  parámetro `c` del Julia correspondiente.
-- **Vuelta a Mandelbrot** con `M`, restaurando el último encuadre en el que
-  estuviste (conserva centro y zoom).
-- **Zoom continuo con la rueda del ratón**, centrado en el cursor. Rueda hacia
-  arriba amplía, hacia abajo reduce.
-- **Zoom ×2 con click izquierdo**, centrado en el punto donde se hizo click.
-- **Pan arrastrando con el botón izquierdo**: click sin arrastrar hace zoom,
-  arrastrar desplaza el encuadre.
-- **Vista previa durante el arrastre**: mientras se arrastra, el render se hace
-  a media resolución y se escala al tamaño final, de forma que el paneo se
-  siente inmediato; al soltar, se lanza el render completo.
-- **Coloración suavizada** (*smooth coloring*) para evitar las bandas visibles
-  típicas del fractal.
-- **Detección de ciclos en Julia**: los puntos que convergen a un ciclo
-  atractor se detectan comparando la órbita con la de 20 iteraciones atrás y se
-  marcan como interiores sin agotar `max_iter`.
-- **Antialiasing 2×2 conmutable con `A`**: 4 muestras por píxel promediadas.
-- **10 paletas de color** ciclables, ordenadas de más suaves a más agresivas:
+## Features
+
+- **Parallel rendering** with [Rayon](https://crates.io/crates/rayon): splits the
+  image rows across all CPU cores automatically.
+- **Asynchronous rendering on a separate thread**: fractal computation lives in
+  its own thread, so the window keeps responding to keyboard and mouse even when
+  a frame takes a while to complete. Obsolete renders are discarded as soon as a
+  newer one arrives.
+- **Two fractals, one engine**: Mandelbrot (parameter plane `c`) and Julia
+  (dynamic plane `z` for a fixed `c`). The iteration `z ← z² + c` is identical;
+  only the variable that sweeps the plane changes.
+- **Interactive Mandelbrot → Julia jump** with the `J` key: the point under the
+  cursor (or the center if the mouse is outside the window) becomes the `c`
+  parameter of the corresponding Julia set.
+- **Back to Mandelbrot** with `M`, restoring the last frame you were viewing
+  (center and zoom are preserved).
+- **Continuous zoom with the mouse wheel**, centered on the cursor. Wheel up
+  zooms in, wheel down zooms out.
+- **Zoom ×2 with left click**, centered on the clicked point.
+- **Pan by dragging with the left button**: a click without dragging zooms,
+  dragging shifts the view.
+- **Preview while dragging**: during a drag the render is done at half
+  resolution and scaled to the final size, so panning feels immediate; when you
+  release, the full render is launched.
+- **Smoothed coloring** (*smooth coloring*) to avoid the typical visible bands
+  of the fractal.
+- **Cycle detection in Julia sets**: points that converge to an attracting cycle
+  are detected by comparing the orbit with the one from 20 iterations before and
+  are marked as interior without exhausting `max_iter`.
+- **Antialiasing 2×2 toggleable with `A`**: 4 samples per pixel averaged.
+- **10 color palettes** cyclable, ordered from smoothest to most aggressive:
   `Cividis`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Twilight`, `HSV`, `Hot`,
-  `Flag` y `Grayscale`.
-- **Ventana de ayuda con `F1`**: abre una ventana secundaria con la lista
-  completa de controles. Al volver a pulsar `F1`, se cierra.
-- **Leyenda con fuente antialiasing** (*Noto Sans Mono*): mucho más legible que
-  las fuentes bitmap tradicionales de 8×8.
-- **Deshacer** con historial en búfer que atraviesa cambios de modo
+  `Flag` and `Grayscale`.
+- **Help window with `F1`**: opens a secondary window with the full list of
+  controls. Pressing `F1` again toggles between Spanish and English.
+- **Legend with antialiased font** (*Noto Sans Mono*): much more readable than
+  traditional 8×8 bitmap fonts.
+- **Undo** with a history buffer that crosses mode changes
   (Mandelbrot ↔ Julia).
-- **Ajuste de iteraciones** en pasos de 1000 en caliente.
-- **Guardado y carga de estado** en JSON (`F5` / `F9`): viewport, modo, `c` del
-  Julia, iteraciones, paleta y estado de AA.
-- **Grabación de secuencia de frames PNG** a 30 fps (`V`) para componer vídeo
-  con `ffmpeg`, con nombre numerado secuencialmente.
-- **Auto-zoom** con `Z`: la vista se acerca lentamente al centro de forma
-  continua, pensado para grabar secuencias de zoom sin tocar el ratón.
-- **Exportación a PNG** de la vista actual (con o sin leyenda).
-- **Leyenda en pantalla** con modo activo, coordenadas del centro, nivel de
-  zoom, iteraciones, paleta activa, estado del AA, tiempo de render, tamaño del
-  historial, indicador de grabación y **coordenadas complejas del punto bajo el
-  cursor** en tiempo real.
+- **Iteration adjustment** in steps of 1000 on the fly.
+- **Save and load session state** in JSON (`F5` / `F9`): viewport center, mode,
+  Julia's `c`, iterations, palette and AA state.
+- **PNG frame sequence recording** at 30 fps (`V`) to compose video with
+  `ffmpeg`, with sequentially numbered filenames.
+- **Auto-zoom** with `Z`: the view slowly zooms in towards the center
+  continuously, designed for recording zoom sequences without touching the mouse.
+- **PNG export** of the current view (with or without the legend).
+- **On-screen legend** with active mode, center coordinates, zoom level,
+  iterations, active palette, AA state, render time, history size, recording
+  indicator and **complex coordinates of the point under the cursor** in real
+  time.
 
-## Requisitos
+## Requirements
 
-### Sistema operativo
+### Operating system
 
-| SO | Estado | Notas |
+| OS | Status | Notes |
 |---|---|---|
-| Linux + X11 | ✅ Soportado | Backend X11 nativo |
-| Linux + Wayland | ✅ Soportado | A través de Xwayland (backend X11) |
-| Windows 10/11 | ✅ Soportado | Backend Win32 (por defecto de `minifb`) |
-| macOS 11+ | ✅ Soportado | Backend Cocoa (por defecto de `minifb`) |
+| Linux + X11 | ✅ Supported | Native X11 backend |
+| Linux + Wayland (KDE, GNOME) | ✅ Supported | Through Xwayland (X11 backend) |
+| Linux + Wayland (Cosmic, others) | ⚠️ With caveats | DPI scaling may leave a black stripe; see Known limitations |
+| Windows 10/11 | ✅ Supported | Win32 backend (`minifb` default) |
+| macOS 11+ | ✅ Supported | Cocoa backend (`minifb` default) |
 
-No funciona en Wayland puro sin Xwayland activado.
+It does not run on pure Wayland without Xwayland enabled.
 
 ### Hardware
 
-| Componente | Mínimo | Recomendado |
+| Component | Minimum | Recommended |
 |---|---|---|
-| CPU | x86_64 o ARM64 | Multicore (Rayon reparte el trabajo) |
-| RAM | 2 GB (1 GB libre durante la compilación) | 4 GB |
-| Disco | 500 MB libres para `target/` | 1 GB |
-| GPU | No necesaria (render 100 % CPU) | — |
-| Pantalla | 1024×768 | 1920×1080 o superior |
+| CPU | x86_64 or ARM64 | Multicore (Rayon splits the work) |
+| RAM | 2 GB (1 GB free during compilation) | 4 GB |
+| Disk | 500 MB free for `target/` | 1 GB |
+| GPU | Not needed (100 % CPU render) | — |
+| Display | 1024×768 | 1920×1080 or higher |
 
 ### Software
 
-- **Rust** 1.85 o superior (edición 2024), instalable vía
+- **Rust** 1.85 or higher (2024 edition), installable via
   [rustup](https://rustup.rs/).
-- **Enlazador del sistema**:
+- **System linker**:
   - Linux (Debian/Ubuntu): `sudo apt install build-essential`
   - Linux (Fedora): `sudo dnf groupinstall "Development Tools"`
   - Linux (Arch): `sudo pacman -S base-devel`
   - Windows: [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-    con la carga de trabajo "Desarrollo para el escritorio con C++".
+    with the "Desktop development with C++" workload.
   - macOS: Xcode Command Line Tools (`xcode-select --install`).
-- **Bibliotecas de desarrollo X11** (solo Linux):
+- **X11 development libraries** (Linux only):
   - Debian/Ubuntu: `sudo apt install libx11-dev libxkbcommon-dev libxcb1-dev`
   - Fedora: `sudo dnf install libX11-devel libxkbcommon-devel libxcb-devel`
   - Arch: `sudo pacman -S libx11 libxkbcommon libxcb`
 
-En la mayoría de escritorios Linux estas bibliotecas ya vienen instaladas; solo
-hacen falta explícitamente en instalaciones mínimas o contenedores.
+On most Linux desktops these libraries are already installed; they are only
+needed explicitly on minimal installations or containers.
 
-En Windows y macOS no se requiere ninguna dependencia adicional: `minifb` usa
-las APIs del sistema (Win32 y Cocoa respectivamente).
+On Windows and macOS no additional dependencies are required: `minifb` uses
+the system APIs (Win32 and Cocoa respectively).
 
-## Instalación
+## Installation
 
 ```bash
 git clone https://github.com/fserradilla65-afk/mandelbrot-rust.git
 cd mandelbrot-rust
 cargo build --release
 ```
-## Uso
 
-El programa acepta argumentos opcionales por línea de comandos para arrancar
-directamente en una vista concreta, sin tener que navegar hasta ella.
+## Usage
+
+The program accepts optional command-line arguments to start directly in a
+specific view, without having to navigate to it.
+
+With `cargo run`, the program arguments go **after `--`**:
 
 ```bash
-# Mandelbrot con el encuadre por defecto
+# Mandelbrot with the default framing
 cargo run --release
 
-# Mandelbrot centrado en (cx, cy), zoom por defecto (1.0)
+# Mandelbrot centered on (cx, cy), default zoom (1.0)
 cargo run --release -- <cx> <cy>
 
-# Mandelbrot centrado en (cx, cy) con zoom explícito
+# Mandelbrot centered on (cx, cy) with explicit zoom
 cargo run --release -- <cx> <cy> <zoom>
 
-# Julia para el parámetro c = cr + ci·i, encuadre por defecto
+# Julia for parameter c = cr + ci·i, default framing
 cargo run --release -- julia <cr> <ci>
 
-# Julia con zoom explícito
+# Julia with explicit zoom
 cargo run --release -- julia <cr> <ci> <zoom>
-
 ```
-## Controles
 
-| Acción | Tecla / ratón |
+## Controls
+
+| Action | Key / mouse |
 |---|---|
-| Zoom continuo centrado en el cursor (arriba amplía, abajo reduce) | Rueda del ratón |
-| Zoom ×2 sobre el punto | Click izquierdo |
-| Pan (arrastrar la vista) | Arrastrar con botón izquierdo |
-| Deshacer (undo) | Click derecho / `U` |
-| **Julia desde el punto bajo el cursor** | `J` (solo en Mandelbrot) |
-| **Volver al último Mandelbrot** | `M` (desde Julia) |
-| Aumentar iteraciones (+1000) | `I` |
-| Reducir iteraciones (−1000) | `O` |
-| Cambiar paleta (rotando) | `P` |
-| Cambiar paleta (directamente) | `0-9`|
-| Activar / desactivar antialiasing | `A` |
+| Continuous zoom centered on cursor (up zooms in, down zooms out) | Mouse wheel |
+| Zoom ×2 on the point | Left click |
+| Pan (drag the view) | Drag with left button |
+| Undo | Right click / `U` |
+| **Julia from the point under the cursor** | `J` (Mandelbrot only) |
+| **Back to last Mandelbrot** | `M` (from Julia) |
+| Increase iterations (+1000) | `I` |
+| Decrease iterations (−1000) | `O` |
+| Change palette (rotating) | `P` |
+| Change palette (directly) | `0-9`|
+| Toggle antialiasing | `A` |
 | Auto-zoom on / off | `Z` |
-| Grabar / detener secuencia de frames | `V` |
-| Guardar captura PNG (sin leyenda) | `S` |
-| Guardar captura PNG (con leyenda) | `Shift` + `S` |
-| Guardar estado de la sesión | `F5` |
-| Cargar estado de la sesión | `F9` |
-| **Abrir / cerrar ventana de ayuda** | `F1` |
-| Resetear al estado inicial | `R` |
-| Salir | `Esc` |
+| Record / stop frame sequence | `V` |
+| Save PNG snapshot (no legend) | `S` |
+| Save PNG snapshot (with legend) | `Shift` + `S` |
+| Save session state | `F5` |
+| Load session state | `F9` |
+| **Open help window / toggle language (ES/EN)** | `F1` |
+| Reset to initial state | `R` |
+| Quit | `Esc` |
 
-### Notas sobre `J` y `M`
+### Notes on `J` and `M`
 
-- **`J`** solo actúa en modo Mandelbrot. Toma las coordenadas complejas del
-  píxel bajo el cursor (o del centro si el ratón está fuera de la ventana) y
-  salta al `J_c` correspondiente con un encuadre inicial `[-2, 2]²`.
-- **`M`** vuelve al **último encuadre de Mandelbrot** que estabas viendo, no al
-  inicial. Así puedes entrar a un Julia, explorarlo y volver sin perder el
-  zoom donde lo dejaste. Si arrancaste directamente en modo Julia por línea de
-  comandos, `M` te lleva al Mandelbrot inicial (porque aún no había uno previo).
-- **`U`** y el click derecho deshacen paso a paso, y **atraviesan cambios de
-  modo**: si saltaste de Mandelbrot a Julia y luego hiciste zoom dentro del
-  Julia, los sucesivos `U` recorren ese historial en orden inverso.
+- **`J`** only acts in Mandelbrot mode. It takes the complex coordinates of the
+  pixel under the cursor (or of the center if the mouse is outside the window)
+  and jumps to the corresponding `J_c` with an initial frame `[-2, 2]²`.
+- **`M`** returns to the **last Mandelbrot frame** you were viewing, not to the
+  initial one. This way you can enter a Julia set, explore it and come back
+  without losing the zoom you had. If you started directly in Julia mode from
+  the command line, `M` takes you to the initial Mandelbrot (because there was
+  no previous one).
+- **`U`** and right click undo step by step, and **cross mode changes**: if you
+  jumped from Mandelbrot to Julia and then zoomed inside the Julia set, the
+  successive `U` presses walk back through that history in reverse order.
 
-### Notas sobre la interacción con el ratón
+### Notes on mouse interaction
 
-- Un **click** (pulsar y soltar sin desplazar) sobre el botón izquierdo hace
-  zoom ×2 sobre el punto donde se pulsó.
-- Un **arrastre** (desplazar el ratón más de 3 píxeles antes de soltar) hace
-  *pan*. Mientras arrastras, el render se hace a media resolución para que la
-  imagen responda de inmediato; al soltar, se recalcula el frame completo.
-- La **rueda** aplica un zoom multiplicativo continuo: girar hacia arriba
-  amplía, girar hacia abajo reduce. El punto complejo bajo el cursor se mantiene
-  fijo durante el zoom.
+- A **click** (press and release without moving) on the left button zooms ×2 on
+  the point where it was pressed.
+- A **drag** (moving the mouse more than 3 pixels before releasing) pans.
+  While you drag, the render is done at half resolution so the image responds
+  immediately; on release, the full frame is recomputed.
+- The **wheel** applies a continuous multiplicative zoom: rolling up zooms in,
+  rolling down zooms out. The complex point under the cursor remains fixed
+  during the zoom.
 
-### Ventana de ayuda (`F1`)
+### Help window (`F1`)
 
-Al pulsar `F1` se abre una ventana secundaria con la lista completa de
-controles, pensada como referencia rápida sin tener que salir del programa.
-Pulsando `F1` de nuevo se cierra. La ventana de ayuda es independiente de la
-principal: puede moverse, taparse con otras ventanas o quedar detrás sin que
-ello afecte al render del fractal.
+Pressing `F1` opens a secondary window with the full list of controls, intended
+as a quick reference without leaving the program. Pressing `F1` again toggles
+between Spanish and English. The help window is independent of the main one: it
+can be moved, covered by other windows or left behind without affecting the
+fractal render.
 
-### Paletas
+### Palettes
 
-El ciclo con `P` recorre las paletas en orden **de más suaves y uniformes a más
-agresivas**, terminando siempre en escala de grises:
+The `P` cycle walks the palettes in order **from smoothest and most uniform to
+most aggressive**, always ending on grayscale:
 
-→ Cividis → Viridis → Inferno → Plasma → Turbo → Twilight → HSV → Hot → Flag → Grayscale → (vuelve a Cividis)
+→ Cividis → Viridis → Inferno → Plasma → Turbo → Twilight → HSV → Hot → Flag → Grayscale → (back to Cividis)
 
-| Paleta | Tipo | Notas |
+| Palette | Type | Notes |
 |---|---|---|
-| **Cividis** | Secuencial | Azul → gris → amarillo. Optimizada para daltonismo. |
-| **Viridis** | Secuencial | Perceptualmente uniforme, tonos apagados y elegantes. |
-| **Inferno** | Secuencial | Perceptualmente uniforme, cálida pero contenida. |
-| **Plasma** | Secuencial | Perceptualmente uniforme, más vibrante (púrpuras y naranjas). |
-| **Turbo** | Secuencial | Arcoíris "mejorado" de Google, colores saturados. |
-| **Twilight** | Cíclica | Extremos claros, centro oscuro, contrastes marcados. |
-| **HSV** | Cíclica | Rueda HSV pura: rojo → amarillo → verde → cian → azul → magenta → rojo. |
-| **Hot** | Secuencial | Clásica de MATLAB: negro → rojo → amarillo → blanco. |
-| **Flag** | Cíclica | 8 colores puros sin transición, ideal para ver los bucles de iteración. |
-| **Grayscale** | Secuencial | Escala de grises pura. |
+| **Cividis** | Sequential | Blue → gray → yellow. Optimized for color blindness. |
+| **Viridis** | Sequential | Perceptually uniform, muted and elegant tones. |
+| **Inferno** | Sequential | Perceptually uniform, warm but contained. |
+| **Plasma** | Sequential | Perceptually uniform, more vibrant (purples and oranges). |
+| **Turbo** | Sequential | Google's "improved" rainbow, saturated colors. |
+| **Twilight** | Cyclic | Light extremes, dark center, marked contrasts. |
+| **HSV** | Cyclic | Pure HSV wheel: red → yellow → green → cyan → blue → magenta → red. |
+| **Hot** | Sequential | MATLAB classic: black → red → yellow → white. |
+| **Flag** | Cyclic | 8 pure colors without transitions, ideal for seeing iteration loops. |
+| **Grayscale** | Sequential | Pure grayscale. |
 
-Las tres primeras (Cividis, Viridis, Inferno) son las más adecuadas para
-capturas "serias": perceptualmente uniformes, accesibles y sin ruido visual.
-Las intermedias (Plasma, Turbo, Twilight) añaden color e intensidad. Las
-últimas (HSV, Hot, Flag) son las más llamativas y coloridas, útiles para
-exploración o vídeos pero potencialmente saturadas para impresión.
+The first three (Cividis, Viridis, Inferno) are the most suitable for "serious"
+captures: perceptually uniform, accessible and without visual noise. The middle
+ones (Plasma, Turbo, Twilight) add color and intensity. The last ones (HSV,
+Hot, Flag) are the most striking and colorful, useful for exploration or videos
+but potentially saturated for printing.
 
-### Capturas
+### Snapshots
 
-Al pulsar `S` se guarda la imagen actual (sin leyenda ni barra de paleta) como
-`.png` en la carpeta `Saves/` del proyecto:
+Pressing `S` saves the current image (without legend or palette bar) as a
+`.png` in the project's `Saves/` folder (the one containing `Cargo.toml`):
 
     mandelbrot-rust/Saves/mandelbrot_<timestamp>_clean.png
 
-Si se pulsa `Shift+S`, guarda la imagen **con** leyenda y barra de paleta.
-El nombre del archivo incluye un timestamp en segundos y una etiqueta del tipo
-de captura (`mandelbrot_<ts>_clean.png` o `mandelbrot_<ts>_legend.png`).
+Pressing `Shift+S` saves the image **with** legend and palette bar. The
+filename includes a timestamp in seconds and a tag for the capture type
+(`mandelbrot_<ts>_clean.png` or `mandelbrot_<ts>_legend.png`).
 
-La carpeta `Saves/` se crea automáticamente la primera vez que se guarda
-algo, y está excluida del control de versiones (`.gitignore`).
+The `Saves/` folder is created automatically the first time something is
+saved, and is excluded from version control (`.gitignore`).
 
-### Guardado y carga de estado
+### State save and load
 
-Con `F5` se guarda el estado actual de la sesión en un JSON dentro de la misma
-carpeta `Saves/`:
+`F5` saves the current session state to a JSON file in the same `Saves/`
+folder:
 
     mandelbrot-rust/Saves/mandelbrot_state.json
 
-El JSON incluye:
+The JSON includes:
 
-- Centro del viewport en coordenadas complejas (`center_x`, `center_y`).
-- Zoom (`zoom`), expresado en las mismas unidades que muestra el visor.
-- Modo actual (Mandelbrot o Julia con su parámetro `c`).
-- Número de iteraciones máximo.
-- Paleta activa.
-- Estado del antialiasing.
-- `version`: número de esquema del formato (actualmente `3`).
+- Viewport center in complex coordinates (`center_x`, `center_y`).
+- Zoom (`zoom`), expressed in the same units shown by the viewer.
+- Current mode (Mandelbrot or Julia with its `c` parameter).
+- Maximum number of iterations.
+- Active palette.
+- Antialiasing state.
+- `version`: schema number of the format (currently `3`).
 
-Con `F9` se recupera ese estado y se re-renderiza la vista. Es útil para
-volver a un punto interesante al día siguiente, o para compartir un encuadre
-concreto con otra persona.
+### Video recording
 
-### Grabación de vídeo
-
-Pulsando `V` se inicia la grabación de una secuencia de frames PNG a 30 fps.
-Los ficheros se guardan en:
+Pressing `V` starts recording a PNG frame sequence at 30 fps. Files are saved
+to:
 Saves/frames_<timestamp>/frame_00000.png
 Saves/frames_<timestamp>/frame_00001.png
 ...
 
-Cada frame se guarda con el mismo contenido que ves en pantalla (incluida la
-leyenda). Para detener la grabación, pulsa `V` otra vez; el programa imprime
-en la terminal el número total de frames y la carpeta donde quedaron.
+Each frame is saved with the same content you see on screen (including the
+legend). To stop the recording, press `V` again; the program prints the total
+frame count and the folder where they were saved to the terminal.
 
-Para montar el vídeo con `ffmpeg`:
+To assemble the video with `ffmpeg`:
 
 ```bash
 ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p zoom.mp4
-Combinado con Z (auto-zoom) puedes grabar un zoom continuo sin tocar el
-ratón: pulsa Z para empezar el acercamiento, V para empezar a grabar, deja
-correr, y al terminar pulsa V para parar y Z para desactivar el auto-zoom.
 ```
-## Estructura del proyecto
+
+Combined with `Z` (auto-zoom) you can record a continuous zoom without touching
+the mouse: press `Z` to start the zoom, `V` to start recording, let it run, and
+when finished press `V` to stop and `Z` to disable auto-zoom.
+
+## Project structure
+
 ```
 mandelbrot-rust/
 ├── Cargo.toml
 ├── src/
-│   ├── main.rs        # bucle de eventos y composición del frame
-│   ├── cli.rs         # parseo de argumentos de línea de comandos
-│   ├── fractal.rs     # FractalKind + iteración (cardioide, bulbo, ciclos)
-│   ├── palette.rs     # Palette + LUT + datos de anclas RGB
+│   ├── main.rs        # event loop and frame composition
+│   ├── cli.rs         # command-line argument parsing
+│   ├── fractal.rs     # FractalKind + iteration (cardioid, bulb, cycles)
+│   ├── palette.rs     # Palette + LUT + RGB anchor data
 │   ├── viewport.rs    # Viewport, zoom_at, pan_pixels, pixel_to_complex
-│   ├── render.rs      # RenderParams + render + Renderer (hilo asíncrono)
+│   ├── render.rs      # RenderParams + render + Renderer (async thread)
 │   ├── state.rs       # State, Snapshot, SavedState (save/load)
-│   ├── ui.rs          # texto antialiasing, barra de paleta, overlay, ayuda
-│   └── png.rs         # guardado PNG + FrameRecorder
-├── Saves/          # Generada al pulsar S o V (no versionada)
+│   ├── ui.rs          # antialiased text, palette bar, overlay, help
+│   └── png.rs         # PNG saving + FrameRecorder
+├── Saves/          # Created when pressing S or V (not versioned)
 └── README.md
 ```
-Cada módulo tiene una responsabilidad clara y se puede probar por separado:
 
-fractal — enum FractalKind { Mandelbrot, Julia { c } } y el iterador
-iterate, con comprobaciones analíticas del cardioide principal y del bulbo
-de período 2, y detección de ciclos por comparación con la órbita previa.
+Each module has a clear responsibility and can be tested separately:
 
-palette — enum Palette con 10 variantes, la función color(t) y una
-PaletteLut que precalcula 2048 entradas para indexar en el bucle de render.
+- **fractal** — `enum FractalKind { Mandelbrot, Julia { c } }` and the
+  `iterate` iterator, with analytic checks for the main cardioid and the
+  period-2 bulb, and cycle detection by comparison with the previous orbit.
+- **palette** — `enum Palette` with 10 variants, the `color(t)` function and a
+  `PaletteLut` that precomputes 2048 entries to index in the render loop.
+- **viewport** — region of the complex plane to render, with specific
+  constructors for Mandelbrot and Julia, pixel ↔ complex conversion, zoom on a
+  point and pixel shift.
+- **render** — `RenderParams` groups everything needed for a frame; `render`
+  executes it with Rayon; `Renderer` manages the background thread, the request
+  queue with obsolete frame discarding and the result collection.
+- **state** — all the mutable state of the program in a single struct, with the
+  transitions (`jump_to_julia`, `back_to_mandelbrot`, `undo`, `reset`) and JSON
+  serialization.
+- **ui** — character drawing with Noto Sans Mono (real antialiasing), legend
+  composition, palette bar, help window and time formatting utilities.
+- **png** — PNG saving with `image` and `FrameRecorder` for sequences.
+- **cli** — parsing of `mandelbrot-rust [cx cy [zoom]]` and
+  `mandelbrot-rust julia <cr> <ci> [zoom]`.
+- **main** — event loop, mouse and keyboard reading, help window management
+  (`F1`) and calls to the previous modules.
 
-viewport — región del plano complejo a renderizar, con constructores
-específicos para Mandelbrot y Julia, conversión píxel ↔ complejo, zoom sobre
-un punto y desplazamiento en píxeles.
+## Dependencies
 
-render — RenderParams agrupa todo lo necesario para un frame; render
-lo ejecuta con Rayon; Renderer gestiona el hilo de fondo, la cola de
-peticiones con descarte de frames obsoletos y la recogida del resultado.
-
-state — todo el estado mutable del programa en un solo struct, con
-las transiciones (jump_to_julia, back_to_mandelbrot, undo, reset) y
-la serialización a JSON.
-
-ui — dibujo de caracteres con Noto Sans Mono (antialiasing real),
-composición de la leyenda, barra de paleta, ventana de ayuda y utilidades de
-formato de tiempo.
-
-png — guardado PNG con image y FrameRecorder para secuencias.
-
-cli — parseo de mandelbrot-rust [cx cy [zoom]] y
-mandelbrot-rust julia <cr> <ci> [zoom].
-
-main — bucle de eventos, lectura de ratón y teclado, gestión de la
-ventana de ayuda (F1) y llamada a los módulos anteriores.
-
-## Dependencias
-
-| Crate | Versión | Uso |
+| Crate | Version | Use |
 |---|---|---|
-| minifb | 0.28.0 | Ventana y bucle de eventos. En Linux se fuerza el backend X11 (default-features = false, features = ["x11"]); en Windows y macOS usa el backend nativo |
-| rayon |	1.12.0	| Paralelismo de datos en el render (reparte las filas entre todos los núcleos).
-| num-complex	| 0.4.6	| Tipo Complex<f64> para representar el parámetro c del Julia y para la aritmética de viewport |
-| image	 | 0.25.10	| Codificación PNG para las capturas (default-features = false, features = ["png"]) |
-| noto-sans-mono-bitmap	 | 0.3	| Tipografía bitmap con antialiasing real (tamaño 16, peso regular) para la leyenda y la ventana de ayuda |
-| dirs	| 5.0.1	| Resolución multiplataforma de la carpeta de imágenes del usuario |
-| serde	| 1.0	| Serialización de Viewport, FractalKind, Palette y SavedState |
-| serde_json	| 1.0	| Formato JSON para guardar y cargar el estado de la sesión |
+| minifb | 0.28.0 | Window and event loop. On Linux the X11 backend is forced (`default-features = false, features = ["x11"]`); on Windows and macOS it uses the native backend. |
+| rayon | 1.12.0 | Data parallelism in the render (splits rows across all cores). |
+| num-complex | 0.4.6 | `Complex<f64>` type to represent Julia's `c` parameter and for viewport arithmetic. |
+| image | 0.25.10 | PNG encoding for snapshots (`default-features = false, features = ["png"]`). |
+| noto-sans-mono-bitmap | 0.3 | Bitmap font with real antialiasing (size 16, regular weight) for the legend and help window. |
+| dirs | 5.0.1 | Cross-platform resolution of the user's pictures folder. |
+| serde | 1.0 | Serialization of `Viewport`, `FractalKind`, `Palette` and `SavedState`. |
+| serde_json | 1.0 | JSON format for saving and loading session state. |
 
-## Limitaciones conocidas
+Note: `font8x8` is no longer used. If you came from an earlier version, you can
+remove it from `Cargo.toml`.
 
-Wayland nativo no soportado en Linux. La app fuerza el backend X11 de
-minifb, que funciona a través de Xwayland. Como consecuencia, no arranca
-en compositores Wayland sin Xwayland activado (poco habitual en escritorios
-de usuario).
+## Known limitations
 
-En compositores Wayland recientes (se ha observado en Cosmic, y puede
-ocurrir en otros que deleguen el escalado X11 al compositor sin notificar
-al cliente), la ventana puede aparecer con una franja negra a la derecha
-y abajo del fractal. La causa es que el compositor aplica un factor de
-escala (125 %, 150 %…) al área física de la ventana, mientras la app
-sigue renderizando su buffer 1:1.
+**Native Wayland not supported on Linux.** The app forces `minifb`'s X11
+backend, which works through Xwayland. As a consequence, it will not start on
+Wayland compositors without Xwayland enabled (uncommon on user desktops).
 
-La ventana de ayuda (F1) no es modal. Es una ventana independiente que
-puede quedar detrás de la principal si haces click en esta última. Para
-volver a verla, tráela al frente con el gestor de ventanas o ciérrala y
-ábrela de nuevo con F1.
+**In recent Wayland compositors (observed in Cosmic, and potentially occurring 
+in others that delegate X11 scaling to the compositor without notifying the client), 
+the window may appear with a black strip to the right and below the fractal. 
+This happens because the compositor applies a scaling factor (125%, 150%, etc.) 
+to the window's physical area, while the app continues to render its buffer at a 1:1 ratio.
 
-Precisión limitada a f64. Permite zooms hasta un factor de ~10¹³–10¹⁵
-según la zona explorada. Más allá aparecen imágenes cada vez más pixeladas.
-Este límite aplica tanto a Mandelbrot como a Julia. No se ha implementado
-perturbation theory ni doble precisión, que serían necesarios para ir más
-lejos.
+**DPI scaling on young Wayland compositors.** On recent Wayland compositors
+(observed on Cosmic; may also happen on others that delegate X11 scaling to the
+compositor without notifying the client), the window may show a black stripe to
+the right and bottom of the fractal. The cause is that the compositor applies a
+scale factor (125 %, 150 %…) to the physical window area, while the app keeps
+rendering its buffer 1:1.
 
-Cambiar de Julia requiere volver a Mandelbrot. La tecla J solo actúa
-en modo Mandelbrot para evitar la ambigüedad de "¿qué c tomo?". Si quieres
-otro Julia, pulsa U (o M) y elige otro punto.
+Tested workarounds:
 
-Antialiasing 2×2 opcional. Con A se activa o desactiva. Con AA activo
-cada frame se calcula con 4 muestras por píxel; con AA desactivado, 1.
+- Use KDE Plasma (Wayland or X11): X11 app scaling works correctly and the
+  stripe does not appear.
+- On KDE: *System Settings → Display and Monitor → Display Configuration →
+  Legacy Applications (X11) → "Apply scaling themselves"*.
+- Launch with `WINIT_X11_SCALE_FACTOR=1 ./mandelbrot-rust` if the compositor
+  respects that variable.
 
-La detección de ciclos solo se aplica a Julia. En Mandelbrot, los puntos
-interiores se detectan por cardioide/bulbo o por agotamiento de max_iter.
+**Harmless warning on close (Linux/Wayland).** When exiting, messages like
+`queue 0x... destroyed while proxies still attached` may appear in the terminal.
+They are emitted by the Wayland/Xwayland layer when releasing resources and do
+not indicate a real error.
 
-## Reconocimientos
+**The help window (`F1`) is not modal.** It is an independent window that can go
+behind the main one if you click on the latter. To see it again, bring it to the
+front with the window manager or close it and reopen it with `F1`.
 
-Las paletas Viridis, Inferno, Plasma, Turbo y Cividis provienen del proyecto
-Matplotlib, a su vez basadas en trabajo de Nathaniel Smith, Stéfan van der
-Walt, Bastian Bechtold y otros.
+**Precision limited to f64.** Allows zooms up to a factor of ~10¹³–10¹⁵
+depending on the region explored. Beyond that, increasingly pixelated images
+appear. This limit applies to both Mandelbrot and Julia. Neither perturbation
+theory nor double precision has been implemented, which would be needed to go
+further.
 
-Hot, Flag y Jet son herencia de MATLAB / IDL.
+**No programmatic window positioning.** `minifb` does not expose a
+cross-platform API for this. If the window appears misplaced, move it manually
+with the window manager. This also applies to the help window.
 
-La fuente bitmap con antialiasing usada en la interfaz es Noto Sans Mono,
-distribuida por Google bajo licencia SIL Open Font License.
+**Changing Julia requires going back to Mandelbrot.** The `J` key only acts in
+Mandelbrot mode to avoid the ambiguity of "which `c` do I take?". If you want
+another Julia, press `U` (or `M`) and pick another point.
 
-El conjunto de Julia y su relación con el de Mandelbrot (conexidad de J_c en
-función de la órbita crítica de c) son resultados clásicos de la dinámica
-compleja; véase por ejemplo Complex Dynamics de Carleson y Gamelin, o los
-trabajos de Douady y Hubbard.
+**Optional 2×2 antialiasing.** Toggled with `A`. With AA on, each frame is
+computed with 4 samples per pixel; with AA off, 1.
 
-La detección analítica del cardioide principal y del bulbo de período 2 sigue
-el criterio clásico descrito en la documentación de referencia del conjunto de
-Mandelbrot (por ejemplo, en The Science of Fractal Images de Peitgen y
-Saupe).
+**Cycle detection only applies to Julia.** In Mandelbrot, interior points are
+detected by cardioid/bulb or by exhausting `max_iter`.
 
-## Licencia
+## Acknowledgements
 
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo
-LICENSE para el texto completo.
+The Viridis, Inferno, Plasma, Turbo and Cividis palettes come from the
+Matplotlib project, which in turn is based on the work of Nathaniel Smith,
+Stéfan van der Walt, Bastian Bechtold and others.
+
+Hot, Flag and Jet are inherited from MATLAB / IDL.
+
+The antialiased bitmap font used in the interface is Noto Sans Mono, distributed
+by Google under the SIL Open Font License.
+
+The Julia set and its relation to the Mandelbrot set (connectedness of J_c as a
+function of the critical orbit of c) are classic results of complex dynamics;
+see for example *Complex Dynamics* by Carleson and Gamelin, or the works of
+Douady and Hubbard.
+
+The analytic detection of the main cardioid and the period-2 bulb follows the
+classic criterion described in the reference documentation of the Mandelbrot
+set (for example, in *The Science of Fractal Images* by Peitgen and Saupe).
+
+## License
+
+This project is distributed under the MIT license. See the LICENSE file for the
+full text.
