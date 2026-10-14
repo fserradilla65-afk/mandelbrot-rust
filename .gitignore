@@ -1,7 +1,7 @@
 # Salida de compilación de Rust
 /target/
 
-# Capturas generadas por el programa
+# Salidas generadas por el programa (capturas, frames, estado, vídeos)
 /Saves/
 
 # Basura del editor
@@ -11,3 +11,13 @@
 
 # Archivos del sistema
 .DS_Store
+
+# Archivos multimedia (por si se generan fuera de Saves/)
+/*.mp4
+/*.webm
+/*.mkv
+
+# Python (por montaje.py)
+__pycache__/
+*.pyc
+.venv/
