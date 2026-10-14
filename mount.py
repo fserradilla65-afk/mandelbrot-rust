@@ -3,10 +3,10 @@
 Monta una secuencia de frames PNG en un vídeo MP4.
 
 Uso:
-    python montaje.py                    # usa la carpeta frames_* más reciente
-    python montaje.py --fps 60           # cambia los FPS
-    python montaje.py -o zoom.mp4        # cambia el nombre de salida
-    python montaje.py -d Saves/frames_1730000000   # elige una carpeta concreta
+    python mount.py                    # usa la carpeta frames_* más reciente
+    python mount.py --fps 60           # cambia los FPS
+    python mount.py -o zoom.mp4        # cambia el nombre de salida
+    python mount.py -d Saves/frames_1730000000   # elige una carpeta concreta
 """
 
 import argparse

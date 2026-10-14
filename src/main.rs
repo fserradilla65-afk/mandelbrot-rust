@@ -31,7 +31,7 @@ fn main() {
 }
 
 fn run() -> Result<(), String> {
-    let mut help_lang = ui::HelpLang::Es;
+    let mut help_lang = ui::HelpLang::En;
     let mut help_window: Option<Window> = None;
     let mut help_buffer = vec![0u32; HELP_WIDTH * HELP_HEIGHT];
     let args = cli::parse_args(ASPECT)?;
@@ -225,7 +225,7 @@ fn run() -> Result<(), String> {
         if window.is_key_pressed(Key::F1, KeyRepeat::No) {
             if help_window.is_none() {
                 match Window::new(
-                    "Ayuda / Help — Controles / Controls",
+                    "",
                     HELP_WIDTH,
                     HELP_HEIGHT,
                     WindowOptions {
