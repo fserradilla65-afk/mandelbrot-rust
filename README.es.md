@@ -58,7 +58,7 @@ vídeos.
   `Cividis`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Twilight`, `HSV`, `Hot`,
   `Flag` y `Grayscale`.
 - **Ventana de ayuda con `F1`**: abre una ventana secundaria con la lista
-  completa de controles. Al volver a pulsar `F1`, se cierra.
+  completa de controles. Al volver a pulsar `F1` alterna entre inglés y español.
 - **Leyenda con fuente antialiasing** (*Noto Sans Mono*): mucho más legible que
   las fuentes bitmap tradicionales de 8×8.
 - **Deshacer** con historial en búfer que atraviesa cambios de modo
@@ -262,7 +262,7 @@ El JSON incluye:
 - Número de iteraciones máximo.
 - Paleta activa.
 - Estado del antialiasing.
-- `version`: número de esquema del formato (actualmente `3`).
+- `version`: número de esquema del formato.
 
 Con `F9` se recupera ese estado y se re-renderiza la vista. Es útil para
 volver a un punto interesante al día siguiente, o para compartir un encuadre
@@ -302,7 +302,7 @@ mandelbrot-rust/
 │   ├── state.rs       # State, Snapshot, SavedState (save/load)
 │   ├── ui.rs          # texto antialiasing, barra de paleta, overlay, ayuda
 │   └── png.rs         # guardado PNG + FrameRecorder
-├── Saves/          # Generada al pulsar S o V (no versionada)
+├── Saves/             # Generada al pulsar S o V (no versionada)
 └── README.md
 ```
 Cada módulo tiene una responsabilidad clara y se puede probar por separado:

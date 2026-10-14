@@ -59,7 +59,7 @@ and reload the session state, and record frame sequences for video composition.
   `Cividis`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Twilight`, `HSV`, `Hot`,
   `Flag` and `Grayscale`.
 - **Help window with `F1`**: opens a secondary window with the full list of
-  controls. Pressing `F1` again toggles between Spanish and English.
+  controls. Pressing `F1` again toggles between English and Spanish.
 - **Legend with antialiased font** (*Noto Sans Mono*): much more readable than
   traditional 8×8 bitmap fonts.
 - **Undo** with a history buffer that crosses mode changes
@@ -307,7 +307,7 @@ mandelbrot-rust/
 │   ├── state.rs       # State, Snapshot, SavedState (save/load)
 │   ├── ui.rs          # antialiased text, palette bar, overlay, help
 │   └── png.rs         # PNG saving + FrameRecorder
-├── Saves/          # Created when pressing S or V (not versioned)
+├── Saves/             # Created when pressing S or V (not versioned)
 └── README.md
 ```
 
