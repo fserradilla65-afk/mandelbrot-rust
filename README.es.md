@@ -166,7 +166,7 @@ cargo run --release -- julia <cr> <ci> <zoom>
 | Cambiar paleta (directamente) | `0-9`|
 | Activar / desactivar antialiasing | `A` |
 | Auto-zoom on / off | `Z` |
-| Grabar / detener secuencia de frames | `V` |
+| Grabar / detener secuencia de fotogramas | `V` |
 | Guardar captura PNG (sin leyenda) | `S` |
 | Guardar captura PNG (con leyenda) | `Shift` + `S` |
 | Guardar estado de la sesión | `F5` |
@@ -203,8 +203,8 @@ cargo run --release -- julia <cr> <ci> <zoom>
 
 Al pulsar `F1` se abre una ventana secundaria con la lista completa de
 controles, pensada como referencia rápida sin tener que salir del programa.
-Pulsando `F1` de nuevo se cierra. La ventana de ayuda es independiente de la
-principal: puede moverse, taparse con otras ventanas o quedar detrás sin que
+Pulsando `F1` de nuevo cambia el idioma (alterna inglés/español). 
+La ventana de ayuda es independiente de la principal: puede moverse, taparse con otras ventanas o quedar detrás sin que
 ello afecte al render del fractal.
 
 ### Paletas
@@ -279,15 +279,25 @@ Saves/frames_<timestamp>/frame_00001.png
 Cada frame se guarda con el mismo contenido que ves en pantalla (incluida la
 leyenda). Para detener la grabación, pulsa `V` otra vez; el programa imprime
 en la terminal el número total de frames y la carpeta donde quedaron.
+Combinado con Z (auto-zoom) puedes grabar un zoom continuo. 
+Pulsa Z para empezar el acercamiento, V para empezar a grabar, deja
+correr, y al terminar pulsa V para parar y Z para desactivar el auto-zoom.
 
 Para montar el vídeo con `ffmpeg`:
 
 ```bash
-ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p zoom.mp4
-Combinado con Z (auto-zoom) puedes grabar un zoom continuo sin tocar el
-ratón: pulsa Z para empezar el acercamiento, V para empezar a grabar, deja
-correr, y al terminar pulsa V para parar y Z para desactivar el auto-zoom.
+ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p Mandelzoom.mp4
+
+Para simplificar he creado un script en Python llamado 'mount.py' en la carpeta raiz del proyecto.
+
+Uso:
+    python mount.py                    # usa la carpeta frames_* más reciente
+    python mount.py --fps 60           # cambia los FPS
+    python mount.py -o Mandelzoom.mp4        # cambia el nombre de salida (Mandelzoom.mp4 por defecto)
+    python mount.py -d Saves/frames_1730000000   # elige una carpeta concreta
+
 ```
+
 ## Estructura del proyecto
 ```
 mandelbrot-rust/

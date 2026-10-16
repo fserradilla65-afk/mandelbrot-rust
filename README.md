@@ -278,20 +278,27 @@ Saves/frames_<timestamp>/frame_00000.png
 Saves/frames_<timestamp>/frame_00001.png
 ...
 
-Each frame is saved with the same content you see on screen (including the
-legend). To stop the recording, press `V` again; the program prints the total
-frame count and the folder where they were saved to the terminal.
+Each frame is saved with the same content you see on the screen (including the
+legend). To stop recording, press `V` again; the program prints
+in the terminal the total number of frames and the folder where they were left.
+Combined with Z (auto-zoom) you can record continuous zoom. 
+Press Z to start zooming, V to start recording, let
+run, and when finished press V to stop and Z to deactivate the auto-zoom.
 
-To assemble the video with `ffmpeg`:
+To mount the video with `ffmpeg`:
 
 ```bash
-ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p zoom.mp4
+ffmpeg -framerate 30 -i frame_%05d.png -c:v libx264 -pix_fmt yuv420p Mandelzoom.mp4
+
+For simplicity I have created a Python script called 'mount.py' in the root folder of the project.
+
+Use:
+    python mount.py #   Use the latest frames_* folder
+    python mount.py --fps 60 #   Change FPS
+    python mount.py -o Mandelzoom.mp4 #   Change output name (Mandelzoom.mp4 by default)
+    python mount.py -d Saves/frames_1730000000 #   Choose a specific folder
+
 ```
-
-Combined with `Z` (auto-zoom) you can record a continuous zoom without touching
-the mouse: press `Z` to start the zoom, `V` to start recording, let it run, and
-when finished press `V` to stop and `Z` to disable auto-zoom.
-
 ## Project structure
 
 ```

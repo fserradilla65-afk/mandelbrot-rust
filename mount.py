@@ -5,7 +5,7 @@ Monta una secuencia de frames PNG en un vídeo MP4.
 Uso:
     python mount.py                    # usa la carpeta frames_* más reciente
     python mount.py --fps 60           # cambia los FPS
-    python mount.py -o zoom.mp4        # cambia el nombre de salida
+    python mount.py -o MandelMandelzoom.mp4        # cambia el nombre de salida
     python mount.py -d Saves/frames_1730000000   # elige una carpeta concreta
 """
 
@@ -40,8 +40,8 @@ def main() -> None:
     )
     ap.add_argument("-d", "--dir",
                     help="Carpeta de frames (por defecto: la más reciente)")
-    ap.add_argument("-o", "--output", default="zoom.mp4",
-                    help="Nombre del vídeo de salida (por defecto: zoom.mp4)")
+    ap.add_argument("-o", "--output", default="Mandelzoom.mp4",
+                    help="Nombre del vídeo de salida (por defecto: Mandelzoom.mp4)")
     ap.add_argument("--fps", type=int, default=30,
                     help="Frames por segundo (por defecto: 30)")
     args = ap.parse_args()
