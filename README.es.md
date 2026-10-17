@@ -313,7 +313,9 @@ mandelbrot-rust/
 │   ├── ui.rs          # texto antialiasing, barra de paleta, overlay, ayuda
 │   └── png.rs         # guardado PNG + FrameRecorder
 ├── Saves/             # Generada al pulsar S o V (no versionada)
-└── README.md
+├── README.md
+├── README.es.md
+└── mount.py
 ```
 Cada módulo tiene una responsabilidad clara y se puede probar por separado:
 

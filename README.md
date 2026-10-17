@@ -300,24 +300,24 @@ Use:
 
 ```
 ## Project structure
-
 ```
 mandelbrot-rust/
 ├── Cargo.toml
 ├── src/
-│   ├── main.rs        # event loop and frame composition
-│   ├── cli.rs         # command-line argument parsing
-│   ├── fractal.rs     # FractalKind + iteration (cardioid, bulb, cycles)
-│   ├── palette.rs     # Palette + LUT + RGB anchor data
+│   ├── main.rs        # bucle de eventos y composición del frame
+│   ├── cli.rs         # parseo de argumentos de línea de comandos
+│   ├── fractal.rs     # FractalKind + iteración (cardioide, bulbo, ciclos)
+│   ├── palette.rs     # Palette + LUT + datos de anclas RGB
 │   ├── viewport.rs    # Viewport, zoom_at, pan_pixels, pixel_to_complex
-│   ├── render.rs      # RenderParams + render + Renderer (async thread)
+│   ├── render.rs      # RenderParams + render + Renderer (hilo asíncrono)
 │   ├── state.rs       # State, Snapshot, SavedState (save/load)
-│   ├── ui.rs          # antialiased text, palette bar, overlay, help
-│   └── png.rs         # PNG saving + FrameRecorder
-├── Saves/             # Created when pressing S or V (not versioned)
-└── README.md
+│   ├── ui.rs          # texto antialiasing, barra de paleta, overlay, ayuda
+│   └── png.rs         # guardado PNG + FrameRecorder
+├── Saves/             # Generada al pulsar S o V (no versionada)
+├── README.md
+├── README.es.md
+└── mount.py
 ```
-
 Each module has a clear responsibility and can be tested separately:
 
 - **fractal** — `enum FractalKind { Mandelbrot, Julia { c } }` and the
