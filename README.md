@@ -41,7 +41,7 @@ and reload the session state, and record frame sequences for video composition.
   parameter of the corresponding Julia set.
 - **Back to Mandelbrot** with `M`, restoring the last frame you were viewing
   (center and zoom are preserved).
-- **Continuous zoom with the mouse wheel**, centered on the cursor. Wheel up
+- **Continuous zoom with the mouse wheel**, centered on the viewport. Wheel up
   zooms in, wheel down zooms out.
 - **Zoom ×2 with left click**, centered on the clicked point.
 - **Pan by dragging with the left button**: a click without dragging zooms,
@@ -159,7 +159,7 @@ cargo run --release -- julia <cr> <ci> <zoom>
 
 | Action | Key / mouse |
 |---|---|
-| Continuous zoom centered on cursor (up zooms in, down zooms out) | Mouse wheel |
+| Continuous zoom on the center of the viewport (up zooms in, down zooms out) | Mouse wheel |
 | Zoom ×2 on the point | Left click |
 | Pan (drag the view) | Drag with left button |
 | Undo | Right click / `U` |
@@ -316,6 +316,7 @@ mandelbrot-rust/
 ├── Saves/             # Generada al pulsar S o V (no versionada)
 ├── README.md
 ├── README.es.md
+├── LICENSE
 └── mount.py
 ```
 Each module has a clear responsibility and can be tested separately:

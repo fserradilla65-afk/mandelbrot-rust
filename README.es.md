@@ -40,7 +40,7 @@ vídeos.
   parámetro `c` del Julia correspondiente.
 - **Vuelta a Mandelbrot** con `M`, restaurando el último encuadre en el que
   estuviste (conserva centro y zoom).
-- **Zoom continuo con la rueda del ratón**, centrado en el cursor. Rueda hacia
+- **Zoom continuo con la rueda del ratón**, centrado en el visor. Rueda hacia
   arriba amplía, hacia abajo reduce.
 - **Zoom ×2 con click izquierdo**, centrado en el punto donde se hizo click.
 - **Pan arrastrando con el botón izquierdo**: click sin arrastrar hace zoom,
@@ -154,7 +154,7 @@ cargo run --release -- julia <cr> <ci> <zoom>
 
 | Acción | Tecla / ratón |
 |---|---|
-| Zoom continuo centrado en el cursor (arriba amplía, abajo reduce) | Rueda del ratón |
+| Zoom continuo sobre el centro del visor (arriba amplía, abajo reduce) | Rueda del ratón |
 | Zoom ×2 sobre el punto | Click izquierdo |
 | Pan (arrastrar la vista) | Arrastrar con botón izquierdo |
 | Deshacer (undo) | Click derecho / `U` |
@@ -315,6 +315,7 @@ mandelbrot-rust/
 ├── Saves/             # Generada al pulsar S o V (no versionada)
 ├── README.md
 ├── README.es.md
+├── LICENSE
 └── mount.py
 ```
 Cada módulo tiene una responsabilidad clara y se puede probar por separado:

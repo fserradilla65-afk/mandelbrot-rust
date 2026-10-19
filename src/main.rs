@@ -37,7 +37,7 @@ fn run() -> Result<(), String> {
     let args = cli::parse_args(ASPECT)?;
     let mut st = state::State::new(args);
     let mut window = Window::new(
-        "Mandelbrot / Julia Explorer (Rust) — F1: Ayuda — Esc: Salir",
+        "Mandelbrot / Julia Explorer (Rust) — F1: Hep — Esc: Quit",
                                  WIDTH,
                                  HEIGHT,
                                  WindowOptions {
@@ -57,7 +57,7 @@ fn run() -> Result<(), String> {
     let mut display = vec![0u32; WIDTH * HEIGHT];
 
     // Estado del ratón
-    let mut mouse_screen = (WIDTH as f64 * 0.5, HEIGHT as f64 * 0.5);
+    let mut mouse_screen = ((WIDTH -1) as f64 * 0.5, (HEIGHT -1) as f64 * 0.5);
     let mut left_was_down = false;
     let mut right_was_down = false;
     let mut drag_origin: Option<(f64, f64)> = None;
@@ -79,17 +79,21 @@ fn run() -> Result<(), String> {
         if let Some((mx, my)) = inside {
             mouse_screen = (mx as f64, my as f64);
         }
-
         // ---------- Rueda del ratón ----------
         if let Some((_, dy)) = window.get_scroll_wheel() {
             if dy != 0.0 && mouse_in {
                 st.push_history();
-                let factor = SCROLL_ZOOM_BASE.powf(dy as f64);  // <-- cambio aquí
-                st.viewport.zoom_at(mouse_screen.0, mouse_screen.1, factor, WIDTH, HEIGHT);
+                let factor = SCROLL_ZOOM_BASE.powf(dy as f64);
+                st.viewport.zoom_at(
+                    (WIDTH - 1) as f64 * 0.5,
+                    (HEIGHT - 1) as f64 * 0.5,
+                    factor,
+                    WIDTH,
+                    HEIGHT,
+                );
                 changed = true;
             }
         }
-
         // ---------- Botones del ratón ----------
         let left = window.get_mouse_down(MouseButton::Left);
         let right = window.get_mouse_down(MouseButton::Right);
@@ -180,7 +184,7 @@ fn run() -> Result<(), String> {
             let (px, py) = if mouse_in {
                 mouse_screen
             } else {
-                (WIDTH as f64 * 0.5, HEIGHT as f64 * 0.5)
+                ((WIDTH -1) as f64 * 0.5, (HEIGHT -1) as f64 * 0.5)
             };
             if st.jump_to_julia(px, py, WIDTH, HEIGHT) {
                 changed = true;
@@ -271,8 +275,8 @@ fn run() -> Result<(), String> {
         // Auto-zoom
         if st.auto_zoom {
             st.viewport.zoom_at(
-                WIDTH as f64 * 0.5,
-                HEIGHT as f64 * 0.5,
+                (WIDTH - 1) as f64 * 0.5,
+                (HEIGHT -1) as f64 * 0.5,
                 1.005,
                 WIDTH,
                 HEIGHT,

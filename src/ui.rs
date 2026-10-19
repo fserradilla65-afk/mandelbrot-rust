@@ -183,9 +183,9 @@ pub fn draw_overlay(
 
     let info = match st.kind {
         FractalKind::Mandelbrot => format!(
-            "Modo: {}   Centro: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
-Iter: {}   Paleta: {}   AA: {}   Tiempo: {}{}   Historial: {}{}",
-st.kind.name(),
+            "Mode: {}   Center: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
+            Iter: {}   Palette: {}   AA: {}   Time: {}{}   History: {}{}",
+        st.kind.name(),
                                            cx,
                                            cy,
                                            st.viewport.zoom(),
@@ -198,9 +198,9 @@ st.kind.name(),
                                            rec_str,
         ),
         FractalKind::Julia { .. } => format!(
-            "Modo: {}   Zoom: {:.3e}\n\
-Iter: {}   Paleta: {}   AA: {}   Tiempo: {}{}   Historial: {}{}",
-st.kind.name(),
+            "Mode: {}   Zoom: {:.3e}\n\
+            Iter: {}   Palette: {}   AA: {}   Time: {}{}   History: {}{}",
+        st.kind.name(),
                                              st.viewport.zoom(),
                                              st.max_iter,
                                              st.palette.name(),
@@ -282,7 +282,7 @@ pub fn draw_help_window(buffer: &mut [u32], w: usize, h: usize, lang: HelpLang) 
 }
 
 const HELP_LINES_ES: [&str; 18] = [
-"  Rueda del raton      Zoom continuo (centrado en cursor)",
+"  Rueda del raton      Zoom continuo (centrado en visor)",
 "  Click izquierdo      Zoom ×2 sobre el punto",
 "  Arrastrar            Pan (mover la vista)",
 "  Click derecho / U    Deshacer (undo)",
@@ -303,7 +303,7 @@ const HELP_LINES_ES: [&str; 18] = [
 ];
 
 const HELP_LINES_EN: [&str; 18] = [
-"  Mouse wheel          Continuous zoom (centered on cursor)",
+"  Mouse wheel          Continuous zoom (centered on the viewport)",
 "  Left click           Zoom ×2 at point",
 "  Drag                 Pan (move the view)",
 "  Right click / U      Undo",
