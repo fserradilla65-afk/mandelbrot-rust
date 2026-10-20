@@ -407,6 +407,12 @@ detected by cardioid/bulb or by exhausting `max_iter`.
 
 ## Acknowledgements
 
+The Mandelbrot set is named after **Benoît Mandelbrot** (1924–2010), who
+studied it in depth at IBM during the 1970s and 1980s, coined the term
+*fractal* in 1975 and laid the foundations of fractal geometry with works such
+as *The Fractal Geometry of Nature* (1982). Without his work, the set would
+have no name and the discipline around it would not exist.
+
 Some palettes come from the Matplotlib project, which in turn is based on the work of 
 Nathaniel Smith, Stéfan van der Walt, Bastian Bechtold and others.
 

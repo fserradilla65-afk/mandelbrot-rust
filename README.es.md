@@ -392,6 +392,12 @@ interiores se detectan por cardioide/bulbo o por agotamiento de max_iter.
 
 ## Reconocimientos
 
+El conjunto de Mandelbrot lleva el nombre de **Benoît Mandelbrot** (1924–2010),
+quien lo estudió en profundidad en IBM durante los años 70 y 80, acuñó el
+término *fractal* en 1975 y sentó las bases de la geometría fractal con obras
+como *The Fractal Geometry of Nature* (1982). Sin su trabajo, ni el conjunto
+tendría nombre ni existiría la disciplina que lo rodea.
+
 Algunas de las paletas provienen del proyecto Matplotlib, a su vez basadas 
 en trabajos de Nathaniel Smith, Stéfan van der Walt, Bastian Bechtold y otros.
 
