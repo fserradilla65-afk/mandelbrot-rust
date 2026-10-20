@@ -54,9 +54,8 @@ vídeos.
   atractor se detectan comparando la órbita con la de 20 iteraciones atrás y se
   marcan como interiores sin agotar `max_iter`.
 - **Antialiasing 2×2 conmutable con `A`**: 4 muestras por píxel promediadas.
-- **10 paletas de color** ciclables, ordenadas de más suaves a más agresivas:
-  `Cividis`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Twilight`, `HSV`, `Hot`,
-  `Flag` y `Grayscale`.
+- **10 paletas de color** ciclables, ordenadas de más suaves a más agresivas,
+  terminando en escala de grises.
 - **Ventana de ayuda con `F1`**: abre una ventana secundaria con la lista
   completa de controles. Al volver a pulsar `F1` alterna entre inglés y español.
 - **Leyenda con fuente antialiasing** (*Noto Sans Mono*): mucho más legible que
@@ -210,28 +209,20 @@ ello afecte al render del fractal.
 ### Paletas
 
 El ciclo con `P` recorre las paletas en orden **de más suaves y uniformes a más
-agresivas**, terminando siempre en escala de grises:
-
-→ Cividis → Viridis → Inferno → Plasma → Turbo → Twilight → HSV → Hot → Flag → Grayscale → (vuelve a Cividis)
+agresivas**, terminando en escala de grises:
 
 | Paleta | Tipo | Notas |
 |---|---|---|
-| **Cividis** | Secuencial | Azul → gris → amarillo. Optimizada para daltonismo. |
-| **Viridis** | Secuencial | Perceptualmente uniforme, tonos apagados y elegantes. |
+| **Viridis** | Secuencial | Tonos perceptualmente uniformes, suaves y elegantes. |
 | **Inferno** | Secuencial | Perceptualmente uniforme, cálida pero contenida. |
 | **Plasma** | Secuencial | Perceptualmente uniforme, más vibrante (púrpuras y naranjas). |
 | **Turbo** | Secuencial | Arcoíris "mejorado" de Google, colores saturados. |
 | **Twilight** | Cíclica | Extremos claros, centro oscuro, contrastes marcados. |
-| **HSV** | Cíclica | Rueda HSV pura: rojo → amarillo → verde → cian → azul → magenta → rojo. |
+| **Berlin** | Divergente | Azul oscuro → blanco → rojo oscuro. Separación clara de zonas. |
 | **Hot** | Secuencial | Clásica de MATLAB: negro → rojo → amarillo → blanco. |
+| **NipySpectral** | Espectral | Negro → violeta → azul → verde → amarillo → rojo → gris. Muy colorida y agresiva. |
 | **Flag** | Cíclica | 8 colores puros sin transición, ideal para ver los bucles de iteración. |
 | **Grayscale** | Secuencial | Escala de grises pura. |
-
-Las tres primeras (Cividis, Viridis, Inferno) son las más adecuadas para
-capturas "serias": perceptualmente uniformes, accesibles y sin ruido visual.
-Las intermedias (Plasma, Turbo, Twilight) añaden color e intensidad. Las
-últimas (HSV, Hot, Flag) son las más llamativas y coloridas, útiles para
-exploración o vídeos pero potencialmente saturadas para impresión.
 
 ### Capturas
 
@@ -401,11 +392,10 @@ interiores se detectan por cardioide/bulbo o por agotamiento de max_iter.
 
 ## Reconocimientos
 
-Las paletas Viridis, Inferno, Plasma, Turbo y Cividis provienen del proyecto
-Matplotlib, a su vez basadas en trabajo de Nathaniel Smith, Stéfan van der
-Walt, Bastian Bechtold y otros.
+Algunas de las paletas provienen del proyecto Matplotlib, a su vez basadas 
+en trabajos de Nathaniel Smith, Stéfan van der Walt, Bastian Bechtold y otros.
 
-Hot, Flag y Jet son herencia de MATLAB / IDL.
+Otras paletas son herencia de MATLAB / IDL.
 
 La fuente bitmap con antialiasing usada en la interfaz es Noto Sans Mono,
 distribuida por Google bajo licencia SIL Open Font License.

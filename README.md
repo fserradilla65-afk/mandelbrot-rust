@@ -55,9 +55,7 @@ and reload the session state, and record frame sequences for video composition.
   are detected by comparing the orbit with the one from 20 iterations before and
   are marked as interior without exhausting `max_iter`.
 - **Antialiasing 2×2 toggleable with `A`**: 4 samples per pixel averaged.
-- **10 color palettes** cyclable, ordered from smoothest to most aggressive:
-  `Cividis`, `Viridis`, `Inferno`, `Plasma`, `Turbo`, `Twilight`, `HSV`, `Hot`,
-  `Flag` and `Grayscale`.
+- **10 color palettes** cyclable, ordered from smoothest to most aggressive, ending in grayscale.
 - **Help window with `F1`**: opens a secondary window with the full list of
   controls. Pressing `F1` again toggles between English and Spanish.
 - **Legend with antialiased font** (*Noto Sans Mono*): much more readable than
@@ -85,7 +83,6 @@ and reload the session state, and record frame sequences for video composition.
 |---|---|---|
 | Linux + X11 | ✅ Supported | Native X11 backend |
 | Linux + Wayland (KDE, GNOME) | ✅ Supported | Through Xwayland (X11 backend) |
-| Linux + Wayland (Cosmic, others) | ⚠️ With caveats | DPI scaling may leave a black stripe; see Known limitations |
 | Windows 10/11 | ✅ Supported | Win32 backend (`minifb` default) |
 | macOS 11+ | ✅ Supported | Cocoa backend (`minifb` default) |
 
@@ -216,28 +213,20 @@ fractal render.
 ### Palettes
 
 The `P` cycle walks the palettes in order **from smoothest and most uniform to
-most aggressive**, always ending on grayscale:
-
-→ Cividis → Viridis → Inferno → Plasma → Turbo → Twilight → HSV → Hot → Flag → Grayscale → (back to Cividis)
+most aggressive**, ending on grayscale:
 
 | Palette | Type | Notes |
 |---|---|---|
-| **Cividis** | Sequential | Blue → gray → yellow. Optimized for color blindness. |
 | **Viridis** | Sequential | Perceptually uniform, muted and elegant tones. |
 | **Inferno** | Sequential | Perceptually uniform, warm but contained. |
 | **Plasma** | Sequential | Perceptually uniform, more vibrant (purples and oranges). |
 | **Turbo** | Sequential | Google's "improved" rainbow, saturated colors. |
 | **Twilight** | Cyclic | Light extremes, dark center, marked contrasts. |
-| **HSV** | Cyclic | Pure HSV wheel: red → yellow → green → cyan → blue → magenta → red. |
+| **Berlin** | Diverging | Dark blue → white → dark red. Clear separation of zones. |
 | **Hot** | Sequential | MATLAB classic: black → red → yellow → white. |
+| **NipySpectral** | Spectral | Black → violet → blue → green → yellow → red → gray. Very colorful and aggressive. |
 | **Flag** | Cyclic | 8 pure colors without transitions, ideal for seeing iteration loops. |
 | **Grayscale** | Sequential | Pure grayscale. |
-
-The first three (Cividis, Viridis, Inferno) are the most suitable for "serious"
-captures: perceptually uniform, accessible and without visual noise. The middle
-ones (Plasma, Turbo, Twilight) add color and intensity. The last ones (HSV,
-Hot, Flag) are the most striking and colorful, useful for exploration or videos
-but potentially saturated for printing.
 
 ### Snapshots
 
@@ -418,11 +407,10 @@ detected by cardioid/bulb or by exhausting `max_iter`.
 
 ## Acknowledgements
 
-The Viridis, Inferno, Plasma, Turbo and Cividis palettes come from the
-Matplotlib project, which in turn is based on the work of Nathaniel Smith,
-Stéfan van der Walt, Bastian Bechtold and others.
+Some palettes come from the Matplotlib project, which in turn is based on the work of 
+Nathaniel Smith, Stéfan van der Walt, Bastian Bechtold and others.
 
-Hot, Flag and Jet are inherited from MATLAB / IDL.
+Other palettes are inherited from MATLAB / IDL.
 
 The antialiased bitmap font used in the interface is Noto Sans Mono, distributed
 by Google under the SIL Open Font License.

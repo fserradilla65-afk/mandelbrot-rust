@@ -6,10 +6,10 @@ pub const LUT_SIZE: usize = 2048;
 pub enum Palette {
     Viridis,
     Inferno,
-    Hsv,
+    Berlin,
     Plasma,
     Turbo,
-    Cividis,
+    NipySpectral,
     Hot,
     Flag,
     Twilight,
@@ -17,16 +17,16 @@ pub enum Palette {
 }
 
 impl Palette {
-    /// Orden de ciclado — Grayscale siempre al final.
+    /// Orden de ciclado
     pub const CYCLE: [Palette; 10] = [
         Palette::Viridis,
-        Palette::Cividis,
         Palette::Inferno,
         Palette::Plasma,
         Palette::Turbo,
         Palette::Twilight,
-        Palette::Hsv,
+        Palette::Berlin,
         Palette::Hot,
+	Palette::NipySpectral,
         Palette::Flag,
         Palette::Grayscale,
     ];
@@ -35,24 +35,15 @@ impl Palette {
         let i = Self::CYCLE.iter().position(|p| *p == self).unwrap_or(0);
         Self::CYCLE[(i + 1) % Self::CYCLE.len()]
     }
-    /// Devuelve la paleta asociada a una tecla numérica.
-    /// `1`..`9` → las 9 primeras de CYCLE
-    /// `0`      → la última de CYCLE (Grayscale)
-    pub fn from_digit(d: u8) -> Option<Self> {
-        match d {
-            1..=9 => Some(Self::CYCLE[(d - 1) as usize]),
-            0 => Some(Self::CYCLE[Self::CYCLE.len() - 1]),
-            _ => None,
-        }
-    }
+
     pub fn name(self) -> &'static str {
         match self {
             Palette::Viridis => "Viridis",
             Palette::Inferno => "Inferno",
-            Palette::Hsv => "HSV",
+            Palette::Berlin => "Berlin",
             Palette::Plasma => "Plasma",
             Palette::Turbo => "Turbo",
-            Palette::Cividis => "Cividis",
+            Palette::NipySpectral => "NipySpectral",
             Palette::Hot => "Hot",
             Palette::Flag => "Flag",
             Palette::Twilight => "Twilight",
@@ -69,16 +60,31 @@ impl Palette {
             }
             Palette::Viridis => interpolate(&VIRIDIS, t),
             Palette::Inferno => interpolate(&INFERNO, t),
-            Palette::Hsv => interpolate(&HSV, t),
+            Palette::Berlin => interpolate(&BERLIN, t),
             Palette::Plasma => interpolate(&PLASMA, t),
             Palette::Turbo => interpolate(&TURBO, t),
-            Palette::Cividis => interpolate(&CIVIDIS, t),
+            Palette::NipySpectral => interpolate(&NIPY_SPECTRAL, t),
             Palette::Hot => interpolate(&HOT, t),
             Palette::Flag => interpolate(&FLAG, t),
             Palette::Twilight => interpolate(&TWILIGHT, t),
         };
         ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
     }
+
+    /// Devuelve la paleta asociada a un número del 0 al 9.
+    /// El 1 corresponde a la primera paleta del ciclo y el 0 a la última (Grayscale).
+    pub fn from_digit(d: u8) -> Option<Self> {
+        if d == 0 {
+            // La tecla 0 va directa a Grayscale (el final del ciclo)
+            Some(Palette::Grayscale)
+        } else if (1..=9).contains(&d) {
+            // Las teclas 1..9 mapean al principio del ciclo
+            // (1 -> índice 0, 2 -> índice 1, ...)
+            Some(Self::CYCLE[(d - 1) as usize])
+        } else {
+            None
+        }
+    }    
 }
 
 const VIRIDIS: [(f64, (u8, u8, u8)); 5] = [
@@ -95,17 +101,6 @@ const INFERNO: [(f64, (u8, u8, u8)); 5] = [
     (0.75, (249, 142,   8)),
     (1.00, (252, 255, 164)),
 ];
-// Rueda HSV pura: rojo → amarillo → verde → cian → azul → magenta → rojo.
-// Cíclica: t=0 y t=1 coinciden, ideal para bandas de iteración sin saltos.
-const HSV: [(f64, (u8, u8, u8)); 7] = [
-    (0.000, (255,   0,   0)),  // rojo
-    (0.167, (255, 255,   0)),  // amarillo
-    (0.333, (  0, 255,   0)),  // verde
-    (0.500, (  0, 255, 255)),  // cian
-    (0.667, (  0,   0, 255)),  // azul
-    (0.833, (255,   0, 255)),  // magenta
-    (1.000, (255,   0,   0)),  // rojo (cierre del ciclo)
-];
 const PLASMA: [(f64, (u8, u8, u8)); 5] = [
     (0.00, ( 13,   8, 135)),
     (0.25, (126,   3, 168)),
@@ -119,14 +114,6 @@ const TURBO: [(f64, (u8, u8, u8)); 5] = [
     (0.50, ( 27, 229, 181)),
     (0.75, (250, 145,  20)),
     (1.00, (122,   4,   3)),
-];
-// Azul → gris → amarillo, segura para daltonismo
-const CIVIDIS: [(f64, (u8, u8, u8)); 5] = [
-    (0.00, (  0,  32,  76)),
-    (0.25, ( 39,  70, 119)),
-    (0.50, ( 87, 108, 117)),
-    (0.75, (154, 148,  90)),
-    (1.00, (253, 233,  68)),
 ];
 const HOT: [(f64, (u8, u8, u8)); 4] = [
     (0.00, (  0,   0,   0)),
@@ -153,7 +140,28 @@ const TWILIGHT: [(f64, (u8, u8, u8)); 7] = [
     (0.85, (157, 186, 119)),
     (1.00, ( 10, 249, 194)),
 ];
-
+// Azul oscuro → blanco → rojo oscuro.
+// Divergente (Crameri), ideal para separar zonas de escape bajo/alto.
+const BERLIN: [(f64, (u8, u8, u8)); 5] = [
+    (0.00, ( 43,  31, 115)),
+    (0.25, ( 64, 122, 217)),
+    (0.50, (240, 237, 237)),
+    (0.75, (237, 125,  87)),
+    (1.00, (161,   0,  18)),
+];
+// Paleta NipySpectral: negra → violeta → azul → verde → amarillo → naranja → rojo → gris.
+// No es perceptualmente uniforme, pero separa las zonas de escape muy bien.
+const NIPY_SPECTRAL: [(f64, (u8, u8, u8)); 9] = [
+    (0.000, (  0,   0,   0)), // Negro (interior o escape muy bajo)
+    (0.125, ( 70,   0, 130)), // Violeta oscuro
+    (0.250, (  0,   0, 200)), // Azul
+    (0.375, (  0, 180, 180)), // Cian / Verde azulado
+    (0.500, (  0, 200,   0)), // Verde
+    (0.625, (200, 200,   0)), // Amarillo
+    (0.750, (255, 100,   0)), // Naranja
+    (0.875, (200,   0,   0)), // Rojo
+    (1.000, (128, 128, 128)), // Gris claro (escape muy alto)
+];
 #[inline]
 fn interpolate(anchors: &[(f64, (u8, u8, u8))], t: f64) -> (u8, u8, u8) {
     if t <= anchors[0].0 {
