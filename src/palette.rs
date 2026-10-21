@@ -7,7 +7,7 @@ pub enum Palette {
     Viridis,
     Inferno,
     Berlin,
-    Plasma,
+    Ocean,
     Turbo,
     NipySpectral,
     Hot,
@@ -21,7 +21,7 @@ impl Palette {
     pub const CYCLE: [Palette; 10] = [
         Palette::Viridis,
         Palette::Inferno,
-        Palette::Plasma,
+        Palette::Ocean,
         Palette::Turbo,
         Palette::Twilight,
         Palette::Berlin,
@@ -41,7 +41,7 @@ impl Palette {
             Palette::Viridis => "Viridis",
             Palette::Inferno => "Inferno",
             Palette::Berlin => "Berlin",
-            Palette::Plasma => "Plasma",
+            Palette::Ocean => "Ocean",
             Palette::Turbo => "Turbo",
             Palette::NipySpectral => "NipySpectral",
             Palette::Hot => "Hot",
@@ -61,7 +61,7 @@ impl Palette {
             Palette::Viridis => interpolate(&VIRIDIS, t),
             Palette::Inferno => interpolate(&INFERNO, t),
             Palette::Berlin => interpolate(&BERLIN, t),
-            Palette::Plasma => interpolate(&PLASMA, t),
+            Palette::Ocean => interpolate(&OCEAN, t),
             Palette::Turbo => interpolate(&TURBO, t),
             Palette::NipySpectral => interpolate(&NIPY_SPECTRAL, t),
             Palette::Hot => interpolate(&HOT, t),
@@ -101,12 +101,13 @@ const INFERNO: [(f64, (u8, u8, u8)); 5] = [
     (0.75, (249, 142,   8)),
     (1.00, (252, 255, 164)),
 ];
-const PLASMA: [(f64, (u8, u8, u8)); 5] = [
-    (0.00, ( 13,   8, 135)),
-    (0.25, (126,   3, 168)),
-    (0.50, (204,  71, 120)),
-    (0.75, (248, 149,  64)),
-    (1.00, (240, 249,  33)),
+// Verde azulado oscuro → azul profundo → celeste → blanco.
+const OCEAN: [(f64, (u8, u8, u8)); 5] = [
+    (0.00, (  0,  64,   0)),
+    (0.25, (  0,  64, 128)),
+    (0.50, (  0,  64, 255)),
+    (0.75, (128, 192, 255)),
+    (1.00, (255, 255, 255)),
 ];
 const TURBO: [(f64, (u8, u8, u8)); 5] = [
     (0.00, ( 48,  18,  59)),
