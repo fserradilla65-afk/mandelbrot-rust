@@ -6,10 +6,10 @@ pub const LUT_SIZE: usize = 2048;
 pub enum Palette {
     Viridis,
     Inferno,
-    Berlin,
     Ocean,
     Turbo,
     NipySpectral,
+    Cubehelix,
     Hot,
     Flag,
     Twilight,
@@ -24,9 +24,9 @@ impl Palette {
         Palette::Ocean,
         Palette::Turbo,
         Palette::Twilight,
-        Palette::Berlin,
+        Palette::Cubehelix,
         Palette::Hot,
-	Palette::NipySpectral,
+        Palette::NipySpectral,
         Palette::Flag,
         Palette::Grayscale,
     ];
@@ -40,7 +40,7 @@ impl Palette {
         match self {
             Palette::Viridis => "Viridis",
             Palette::Inferno => "Inferno",
-            Palette::Berlin => "Berlin",
+            Palette::Cubehelix => "Cubehelix",
             Palette::Ocean => "Ocean",
             Palette::Turbo => "Turbo",
             Palette::NipySpectral => "NipySpectral",
@@ -60,7 +60,7 @@ impl Palette {
             }
             Palette::Viridis => interpolate(&VIRIDIS, t),
             Palette::Inferno => interpolate(&INFERNO, t),
-            Palette::Berlin => interpolate(&BERLIN, t),
+            Palette::Cubehelix => interpolate(&CUBEHELIX, t),
             Palette::Ocean => interpolate(&OCEAN, t),
             Palette::Turbo => interpolate(&TURBO, t),
             Palette::NipySpectral => interpolate(&NIPY_SPECTRAL, t),
@@ -141,14 +141,12 @@ const TWILIGHT: [(f64, (u8, u8, u8)); 7] = [
     (0.85, (157, 186, 119)),
     (1.00, ( 10, 249, 194)),
 ];
-// Azul oscuro → blanco → rojo oscuro.
-// Divergente (Crameri), ideal para separar zonas de escape bajo/alto.
-const BERLIN: [(f64, (u8, u8, u8)); 5] = [
-    (0.00, ( 43,  31, 115)),
-    (0.25, ( 64, 122, 217)),
-    (0.50, (240, 237, 237)),
-    (0.75, (237, 125,  87)),
-    (1.00, (161,   0,  18)),
+const CUBEHELIX: [(f64, (u8, u8, u8)); 5] = [
+    (0.00, (  0,   0,   0)),
+    (0.25, ( 21,  83,  75)),
+    (0.50, (161, 121,  74)),
+    (0.75, (198, 180, 237)),
+    (1.00, (255, 255, 255)),
 ];
 // Paleta NipySpectral: negra → violeta → azul → verde → amarillo → naranja → rojo → gris.
 // No es perceptualmente uniforme, pero separa las zonas de escape muy bien.
