@@ -176,7 +176,7 @@ pub fn draw_overlay(
         None => String::new(),
     };
     let preview_str = if render_time > Duration::from_millis(200) {
-        "   (renderizando…)"
+        "   (rendering…)"
     } else {
         ""
     };
