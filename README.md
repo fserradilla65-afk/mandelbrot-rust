@@ -21,7 +21,7 @@ and reload the session state, and record frame sequences for video composition.
 
 ![Status: functional](https://img.shields.io/badge/status-functional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)
-![Version](https://img.shields.io/badge/version-0.3.0-blue)
+![Version](https://img.shields.io/badge/version-0.4.0-blue)
 
 ---
 

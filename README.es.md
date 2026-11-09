@@ -22,7 +22,7 @@ vídeos.
 
 ![Estado: funcional](https://img.shields.io/badge/estado-funcional-brightgreen)
 ![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)
-![Versión](https://img.shields.io/badge/versi%C3%B3n-0.3.0-blue)
+![Versión](https://img.shields.io/badge/versi%C3%B3n-0.4.0-blue)
 
 ## Características
 
@@ -153,7 +153,6 @@ cargo run --release -- -0.5 0.0 1.0 3
 
 # Julia para el parámetro c = cr + ci·i con zoom 1.0 y exponente n=4
 cargo run --release -- julia -0.8 0.156 1.0 4
-
 
 ```
 ## Controles
