@@ -180,38 +180,45 @@ pub fn draw_overlay(
     } else {
         ""
     };
+    // Creamos un sufijo para el exponente (solo si es distinto de 2)
+    let exp_str = if st.exponent != 2 {
+        format!("   n = {}", st.exponent)
+    } else {
+        String::new()
+    };
 
     let info = match st.kind {
         FractalKind::Mandelbrot => format!(
-            "Mode: {}   Center: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
+            "Mode: {}{}   Center: ({:+.10}, {:+.10})   Zoom: {:.3e}\n\
             Iter: {}   Palette: {}   AA: {}   Time: {}{}   History: {}{}",
-        st.kind.name(),
-                                           cx,
-                                           cy,
-                                           st.viewport.zoom(),
-                                           st.max_iter,
-                                           st.palette.name(),
-                                           aa_str,
-                                           format_time(render_time),
-                                               preview_str,          // <-- añadido
-                                           st.history.len(),
-                                           rec_str,
+            st.kind.name(),
+            exp_str,    
+            cx,
+            cy,
+            st.viewport.zoom(),
+            st.max_iter,
+            st.palette.name(),
+            aa_str,
+            format_time(render_time),
+            preview_str,
+            st.history.len(),
+            rec_str,
         ),
         FractalKind::Julia { .. } => format!(
-            "Mode: {}   Zoom: {:.3e}\n\
+            "Mode: {}{}   Zoom: {:.3e}\n\
             Iter: {}   Palette: {}   AA: {}   Time: {}{}   History: {}{}",
-        st.kind.name(),
-                                             st.viewport.zoom(),
-                                             st.max_iter,
-                                             st.palette.name(),
-                                             aa_str,
-                                             format_time(render_time),
-                                                 preview_str,          // <-- añadido
-                                             st.history.len(),
-                                             rec_str,
+            st.kind.name(),
+            exp_str,          // <-- Se inserta aquí (después de la c)
+            st.viewport.zoom(),
+            st.max_iter,
+            st.palette.name(),
+            aa_str,
+            format_time(render_time),
+            preview_str,
+            st.history.len(),
+            rec_str,
         ),
     };
-
     // Caja translúcida de fondo
     let lines = info.lines().count();
     let max_line = info.lines().map(|l| l.chars().count()).max().unwrap_or(0);

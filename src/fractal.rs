@@ -16,18 +16,14 @@ impl FractalKind {
     }
 }
 
-/// Devuelve `true` si (cx, cy) cae dentro del cardioide principal
-/// o del bulbo de período 2. Solo válido para Mandelbrot.
 #[inline(always)]
 pub fn in_mandelbrot_interior(cx: f64, cy: f64) -> bool {
     let y2 = cy * cy;
-    // Cardioide: q(q + (x − 1/4)) ≤ y²/4
     let xm = cx - 0.25;
     let q = xm * xm + y2;
     if q * (q + xm) <= 0.25 * y2 {
         return true;
     }
-    // Bulbo período 2: (x + 1)² + y² ≤ 1/16
     let xp = cx + 1.0;
     if xp * xp + y2 <= 0.0625 {
         return true;
@@ -35,12 +31,6 @@ pub fn in_mandelbrot_interior(cx: f64, cy: f64) -> bool {
     false
 }
 
-/// Itera `z ← z² + c` desde (zr0, zi0) hasta que |z|² > escape_sq o
-/// se alcancen max_iter iteraciones. Devuelve (iter, zr, zi).
-///
-/// Si `check_period`, cada 20 iteraciones compara con el valor de 20
-/// iteraciones atrás; si coinciden (a menos de ε) el punto está en un
-/// ciclo atractor y se considera interior (retorna max_iter).
 #[inline(always)]
 pub fn iterate(
     mut zr: f64,
@@ -50,6 +40,7 @@ pub fn iterate(
     max_iter: u32,
     escape_sq: f64,
     check_period: bool,
+    exponent: u32,
 ) -> (u32, f64, f64) {
     let mut zr2 = zr * zr;
     let mut zi2 = zi * zi;
@@ -63,8 +54,23 @@ pub fn iterate(
     const EPS2: f64 = 1e-16;
 
     while zr2 + zi2 <= escape_sq && iter < max_iter {
-        zi = 2.0 * zr * zi + ci;
-        zr = zr2 - zi2 + cr;
+        // Bifurcación: n == 2 usa el camino rápido original.
+        // n > 2 usa el bucle genérico de potenciación.
+        let (nzr, nzi) = if exponent == 2 {
+            (zr2 - zi2, 2.0 * zr * zi)
+        } else {
+            // z^n por multiplicación repetida
+            let (mut ar, mut ai) = (zr, zi);
+            for _ in 1..exponent {
+                let tr = ar * zr - ai * zi;
+                ai = ar * zi + ai * zr;
+                ar = tr;
+            }
+            (ar, ai)
+        };
+
+        zr = nzr + cr;
+        zi = nzi + ci;
         zr2 = zr * zr;
         zi2 = zi * zi;
         iter += 1;

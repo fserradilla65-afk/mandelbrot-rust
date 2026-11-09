@@ -17,6 +17,7 @@ pub struct RenderParams {
     pub palette: Palette,
     pub antialias: bool,
     pub preview: bool,
+    pub exponent: u32, // <-- NUEVO: exponente n para z^n + c
 }
 
 // ---------------------------------------------------------------
@@ -58,6 +59,7 @@ fn render_impl(
     let scale_y = (vp.y_max - vp.y_min) / (h as f64 - 1.0);
     let kind = p.kind;
     let max_iter = p.max_iter;
+    let exponent = p.exponent; // <-- NUEVO
     let is_mandel = matches!(kind, FractalKind::Mandelbrot);
 
     // AA 2x2
@@ -78,7 +80,7 @@ fn render_impl(
                     for sx in 0..samples {
                         let px = cx + (sx as f64 - half) * sample_step_x;
                         let py = cy + (sy as f64 - half) * sample_step_y;
-                        let c = sample_pixel(px, py, kind, max_iter, lut, is_mandel);
+                        let c = sample_pixel(px, py, kind, max_iter, lut, is_mandel, exponent);
                         r += (c >> 16) & 0xFF;
                         g += (c >> 8) & 0xFF;
                         b += c & 0xFF;
@@ -86,12 +88,12 @@ fn render_impl(
                 }
                 let (r, g, b) = (
                     (r as f64 * inv_n).round() as u32,
-                                 (g as f64 * inv_n).round() as u32,
-                                 (b as f64 * inv_n).round() as u32,
+                    (g as f64 * inv_n).round() as u32,
+                    (b as f64 * inv_n).round() as u32,
                 );
                 (r << 16) | (g << 8) | b
             } else {
-                sample_pixel(cx, cy, kind, max_iter, lut, is_mandel)
+                sample_pixel(cx, cy, kind, max_iter, lut, is_mandel, exponent)
             };
         }
     });
@@ -105,9 +107,10 @@ fn sample_pixel(
     max_iter: u32,
     lut: &PaletteLut,
     is_mandel: bool,
+    exponent: u32, // <-- NUEVO
 ) -> u32 {
-    // Interior trivial (solo Mandelbrot).
-    if is_mandel && fractal::in_mandelbrot_interior(cx, cy) {
+    // El interior analítico solo es válido para Mandelbrot de orden 2.
+    if is_mandel && exponent == 2 && fractal::in_mandelbrot_interior(cx, cy) {
         return 0x0000_0000;
     }
 
@@ -116,7 +119,10 @@ fn sample_pixel(
         FractalKind::Julia { c } => (cx, cy, c.re, c.im),
     };
 
-    let (iter, zr, zi) = fractal::iterate(zr0, zi0, cr, ci, max_iter, ESCAPE_SQ, true);
+    let (iter, zr, zi) = fractal::iterate(
+        zr0, zi0, cr, ci, max_iter, ESCAPE_SQ, true, exponent,
+    );
+    
     if iter >= max_iter {
         return 0x0000_0000;
     }
@@ -163,17 +169,17 @@ impl Renderer {
         let (resp_tx, resp_rx) = mpsc::channel::<Response>();
 
         std::thread::Builder::new()
-        .name("fractal-renderer".into())
-        .spawn(move || {
-            while let Ok(req) = req_rx.recv() {
-                let Request { generation, params, mut buffer } = req;
-                render(&mut buffer, WIDTH, HEIGHT, &params);
-                if resp_tx.send(Response { generation, buffer }).is_err() {
-                    break;
+            .name("fractal-renderer".into())
+            .spawn(move || {
+                while let Ok(req) = req_rx.recv() {
+                    let Request { generation, params, mut buffer } = req;
+                    render(&mut buffer, WIDTH, HEIGHT, &params);
+                    if resp_tx.send(Response { generation, buffer }).is_err() {
+                        break;
+                    }
                 }
-            }
-        })
-        .expect("no se pudo crear el hilo de render");
+            })
+            .expect("no se pudo crear el hilo de render");
 
         Self {
             req_tx,

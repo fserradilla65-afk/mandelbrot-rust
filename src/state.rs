@@ -15,6 +15,10 @@ pub const HISTORY_MAX: usize = 500;
 /// estructura de `SavedState` de forma incompatible.
 pub const STATE_VERSION: u32 = 3;
 
+fn default_exponent() -> u32 {
+    2
+}
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Snapshot {
     pub viewport: Viewport,
@@ -31,6 +35,8 @@ pub struct SavedState {
     pub max_iter: u32,
     pub palette: Palette,
     pub antialias: bool,
+    #[serde(default = "default_exponent")]
+    pub exponent: u32,
 }
 
 pub struct State {
@@ -40,11 +46,13 @@ pub struct State {
     pub palette: Palette,
     pub antialias: bool,
     pub auto_zoom: bool,
+    pub exponent: u32,
     pub history: VecDeque<Snapshot>,
     pub last_mandelbrot: Option<Viewport>,
     pub initial_viewport: Viewport,
     pub initial_kind: FractalKind,
     pub initial_max_iter: u32,
+    pub initial_exponent: u32,
 }
 
 impl State {
@@ -56,12 +64,14 @@ impl State {
             palette: Palette::Viridis,
             antialias: false,
             auto_zoom: false,
+            exponent: args.exponent,
             history: VecDeque::new(),
             last_mandelbrot: matches!(args.kind, FractalKind::Mandelbrot)
-            .then_some(args.viewport),
+                .then_some(args.viewport),
             initial_viewport: args.viewport,
             initial_kind: args.kind,
             initial_max_iter: MAX_ITER_DEFAULT,
+            initial_exponent: args.exponent,
         }
     }
 
@@ -90,9 +100,10 @@ impl State {
         self.viewport = self.initial_viewport;
         self.kind = self.initial_kind;
         self.max_iter = self.initial_max_iter;
+        self.exponent = self.initial_exponent;
         self.history.clear();
         self.last_mandelbrot = matches!(self.initial_kind, FractalKind::Mandelbrot)
-        .then_some(self.initial_viewport);
+            .then_some(self.initial_viewport);
     }
 
     pub fn jump_to_julia(&mut self, mx: f64, my: f64, w: usize, h: usize) -> bool {
@@ -125,8 +136,10 @@ impl State {
             palette: self.palette,
             antialias: self.antialias,
             preview,
+            exponent: self.exponent,
         }
     }
+
     pub fn save_to_file(&self) -> Result<PathBuf, String> {
         let path = crate::png::saves_dir()?.join("mandelbrot_state.json");
         let (cx, cy) = self.viewport.center();
@@ -139,53 +152,55 @@ impl State {
             max_iter: self.max_iter,
             palette: self.palette,
             antialias: self.antialias,
+            exponent: self.exponent,
         };
         let json = serde_json::to_string_pretty(&s)
-        .map_err(|e| format!("no se pudo serializar: {}", e))?;
+            .map_err(|e| format!("no se pudo serializar: {}", e))?;
         std::fs::write(&path, json)
-        .map_err(|e| format!("no se pudo escribir '{}': {}", path.display(), e))?;
+            .map_err(|e| format!("no se pudo escribir '{}': {}", path.display(), e))?;
         Ok(path)
     }
+
     pub fn load_from_file(&mut self) -> Result<(), String> {
         let path = crate::png::saves_dir()?.join("mandelbrot_state.json");
         let data = std::fs::read_to_string(&path)
-        .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
+            .map_err(|e| format!("no se pudo leer '{}': {}", path.display(), e))?;
 
         // Parseamos primero como Value para poder leer `version` sin que
         // un formato antiguo provoque un error críptico de "missing field".
         let value: serde_json::Value = serde_json::from_str(&data)
-        .map_err(|e| format!("JSON inválido: {}", e))?;
+            .map_err(|e| format!("JSON inválido: {}", e))?;
 
         let version = value
-        .get("version")
-        .and_then(|v| v.as_u64())
-        .ok_or_else(|| {
-            "El archivo no contiene el campo 'version'. \
-Probablemente sea de una versión anterior del programa."
-.to_string()
-        })? as u32;
+            .get("version")
+            .and_then(|v| v.as_u64())
+            .ok_or_else(|| {
+                "El archivo no contiene el campo 'version'. \
+                 Probablemente sea de una versión anterior del programa."
+                    .to_string()
+            })? as u32;
 
         match version {
             STATE_VERSION => { /* formato actual, seguimos */ }
             1 | 2 => {
                 return Err(format!(
                     "El archivo usa un formato antiguo (v{}). \
-Esta versión del programa espera la v{}. \
-Vuelve a guardarlo con F5.",
-version, STATE_VERSION
+                     Esta versión del programa espera la v{}. \
+                     Vuelve a guardarlo con F5.",
+                    version, STATE_VERSION
                 ));
             }
             v => {
                 return Err(format!(
                     "Versión de estado no soportada: v{}. \
-Esta versión del programa espera la v{}.",
-v, STATE_VERSION
+                     Esta versión del programa espera la v{}.",
+                    v, STATE_VERSION
                 ));
             }
         }
 
         let s: SavedState = serde_json::from_value(value)
-        .map_err(|e| format!("JSON inválido para la v{}: {}", STATE_VERSION, e))?;
+            .map_err(|e| format!("JSON inválido para la v{}: {}", STATE_VERSION, e))?;
 
         let half = match s.kind {
             FractalKind::Mandelbrot => 1.5 / s.zoom,
@@ -197,9 +212,10 @@ v, STATE_VERSION
         self.max_iter = s.max_iter.max(MAX_ITER_DEFAULT.min(100));
         self.palette = s.palette;
         self.antialias = s.antialias;
+        self.exponent = s.exponent.clamp(2, 8);
         self.history.clear();
         self.last_mandelbrot = matches!(s.kind, FractalKind::Mandelbrot)
-        .then_some(self.viewport);
+            .then_some(self.viewport);
         Ok(())
     }
 }

@@ -150,6 +150,13 @@ cargo run --release -- julia <cr> <ci>
 
 # Julia with explicit zoom
 cargo run --release -- julia <cr> <ci> <zoom>
+
+# Mandelbrot centered on (cx, cy) with explicit zoom and exponent n=3
+cargo run --release -- -0.5 0.0 1.0 3
+
+# Julia for parameter c = cr + ci·i with zoom 1.0 and exponent n=4
+cargo run --release -- julia -0.8 0.156 1.0 4
+
 ```
 
 ## Controls
