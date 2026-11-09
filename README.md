@@ -34,8 +34,9 @@ and reload the session state, and record frame sequences for video composition.
   a frame takes a while to complete. Obsolete renders are discarded as soon as a
   newer one arrives.
 - **Two fractals, one engine**: Mandelbrot (parameter plane `c`) and Julia
-  (dynamic plane `z` for a fixed `c`). The iteration `z ← z² + c` is identical;
-  only the variable that sweeps the plane changes.
+  (dynamic plane `z` for a fixed `c`). The iteration `z ← zⁿ + c` is identical
+  for both; only the variable that sweeps the plane changes. The exponent `n`
+  is configurable from the command line (default `2`, classic Mandelbrot/Julia).
 - **Interactive Mandelbrot → Julia jump** with the `J` key: the point under the
   cursor (or the center if the mouse is outside the window) becomes the `c`
   parameter of the corresponding Julia set.

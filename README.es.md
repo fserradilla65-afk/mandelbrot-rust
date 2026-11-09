@@ -33,8 +33,10 @@ vídeos.
   tarde en completarse. Los renders obsoletos se descartan en cuanto llega uno
   más nuevo.
 - **Dos fractales con el mismo motor**: Mandelbrot (plano de parámetros `c`) y
-  Julia (plano dinámico `z` para un `c` fijo). La iteración `z ← z² + c` es
-  idéntica; solo cambia qué variable recorre el plano.
+  Julia (plano dinámico `z` para un `c` fijo). La iteración `z ← zⁿ + c` es
+  idéntica en ambos; solo cambia qué variable recorre el plano. El exponente `n`
+  es configurable desde la línea de comandos (por defecto `2`, el Mandelbrot/Julia
+  clásico).
 - **Salto interactivo Mandelbrot → Julia** con la tecla `J`: el punto bajo el
   cursor (o el centro si el ratón está fuera de la ventana) pasa a ser el
   parámetro `c` del Julia correspondiente.
